@@ -4,22 +4,11 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@app/*": [
-        "app/*"
-      ],
-      "@assets/*": [
-        "assets/*"
-      ],
-      "@components": [
-        "components/*"
-      ],
-      "@constants/*": [
-        "constants/*"
-      ]
+      "@app/*": ["app/*"],
+      "@assets/*": ["assets/*"],
+      "@components/*": ["components/*"],
+      "@constants/*": ["constants/*"]
     }
   },
-  "include": [
-    "**/*.tx",
-    "**/*.tsx"
-  ]
+  "include": ["**/*.ts", "**/*.tsx"]
 }
