@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest --watchAll",
+    "format": "prettier --check 'app/**/*.{js, jsx, ts, tsx}', 'components/**/*.{js, jsx, ts, tsx}', 'constants/**/*.{js, jsx, ts, tsx}'",
+    "format: fix": "prettier --write 'app/**/*.{js, jsx, ts, tsx}', 'components/**/*.{js, jsx, ts, tsx}', 'constants/**/*.{js, jsx, ts, tsx}' "
   },
   "dependencies": {
     "expo": "~53.0.20",
