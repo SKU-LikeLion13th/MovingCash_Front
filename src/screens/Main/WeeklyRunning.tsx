@@ -7,7 +7,7 @@ export default function WeeklyRunning() {
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <View className="mt-5 ">
+    <View className="">
       <View className="flex-row justify-between">
         {weekdays.map((day, index) => {
           let bgColor = "";
