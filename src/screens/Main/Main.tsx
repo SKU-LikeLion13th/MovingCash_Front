@@ -3,6 +3,8 @@ import { View, Text, Image } from "react-native";
 import Profile from "./Profile";
 import WeeklyRunning from "./WeeklyRunning";
 import RecentMoving from "./RecentMoving";
+import NavigateButton from "../Activity/Running/NavigateButton";
+import Running from "../Activity/Running/Running";
 
 export default function Main() {
   return (
