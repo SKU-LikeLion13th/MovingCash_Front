@@ -6,6 +6,8 @@ import Bar from "src/components/Bar";
 import Store from "src/screens/Store/Store";
 import PointMain from "src/screens/Point/PointMain";
 import AvailablePoints from "src/screens/Point/AvailablePoints";
+import Splash from "src/screens/Member/Splash";
+import Login from "src/screens/Member/Login";
 
 export type RootStackParamList = {
   PointMain: undefined;
@@ -21,6 +23,8 @@ export default function App() {
         <Stack.Screen name="PointMain" component={PointMain} />
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="AvailablePoints" component={AvailablePoints} />
+        <Stack.Screen name="Splash" component={Splash} />
+        <Stack.Screen name="Login" component={Login} />
       </Stack.Navigator>
     </NavigationContainer>
   );
