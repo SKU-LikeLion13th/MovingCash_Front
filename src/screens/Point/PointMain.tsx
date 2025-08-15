@@ -70,7 +70,10 @@ export default function PointMain() {
             </TouchableOpacity>
           </View>
           {/* 누적포인트 사용하기 */}
-          <TouchableOpacity className="bg-[#E9690D] w-[90%] mt-8 py-5 rounded-xl">
+          <TouchableOpacity
+            className="bg-[#E9690D] w-[90%] mt-8 py-5 rounded-xl"
+            onPress={() => navigation.navigate("UsePoint")}
+          >
             <Text className="text-center text-white text-[17px]">
               누적 포인트 <Text className="font-bold">사용하기</Text>
             </Text>
