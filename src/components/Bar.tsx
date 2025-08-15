@@ -1,4 +1,3 @@
-// Bar.tsx
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { SvgProps } from 'react-native-svg';
