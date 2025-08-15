@@ -5,6 +5,13 @@ import Main from "src/screens/Main/Main";
 import PointMain from "src/screens/Point/PointMain";
 import AvailablePoints from "src/screens/Point/AvailablePoints";
 import UsePoint from "src/screens/Point/UsePoint";
+import Splash from "src/screens/Member/Splash";
+import Login from "src/screens/Member/Login";
+import Nickname from "src/screens/Member/Nickname";
+import Id from "src/screens/Member/Id";
+import Pw from "src/screens/Member/Pw";
+import Start from "src/screens/Member/Start";
+
 
 // React Navigation에서는 Stack Navigator에 등록한 스크린 이름, 파라미터 타입을 먼저 정의하고,
 // useNavigation에 알려줘야해
@@ -25,10 +32,19 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {/* 호연 */}
         <Stack.Screen name="PointMain" component={PointMain} />
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="AvailablePoints" component={AvailablePoints} />
         <Stack.Screen name="UsePoint" component={UsePoint} />
+
+        {/* 유정 */}
+        <Stack.Screen name="Splash" component={Splash} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Nickname" component={Nickname} />
+        <Stack.Screen name="Id" component={Id} />
+        <Stack.Screen name="Pw" component={Pw} />
+        <Stack.Screen name="Start" component={Start} />
       </Stack.Navigator>
     </NavigationContainer>
   );
