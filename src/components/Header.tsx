@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { useNavigate } from "react-router-native";
+import { useNavigation } from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface HeaderProps {
@@ -9,13 +9,13 @@ interface HeaderProps {
 }
 
 export default function Header({ title, showBack = true }: HeaderProps) {
-  const navigate = useNavigate();
+  const navigation = useNavigation();
 
   return (
     <View className="flex flex-row items-center py-6 mt-10 relative">
       {showBack && (
         <TouchableOpacity
-          onPress={() => navigate(-1)}
+          onPress={() => navigation.goBack()}
           className="absolute left-4"
         >
           <MaterialIcons name="arrow-back" size={30} color="white" />
