@@ -8,7 +8,7 @@ import WalkingPoints from "./components/WalkingPoints";
 export default function Running() {
   return (
     <View className="flex-1 bg-[#101010] px-3">
-      <Header title="Running" />
+      <Header title="Walking" />
 
       <WalkingTracker />
 
