@@ -4,11 +4,11 @@ import Header from "src/components/Header";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { RootStackParamList } from "App";
+import { MainStackParamList } from "App";
 
 export default function PointMain() {
   // 2. useNavigation에 타입 적용
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
   const missions = [
     {
