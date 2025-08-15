@@ -9,7 +9,8 @@
       "@components/*": ["components/*"],
       "@constants/*": ["constants/*"],
       "@screens/*": ["screens/*"]
-    }
+    },
+    "types": ["nativewind/types"]
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx", "src/screens/Main/StartNow.tss"]
 }
