@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import Header from "../../components/Header";
 import { Switch } from 'react-native-switch';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Login() {
   const [isEnabled, setIsEnabled] = useState(false);
+  const navigation = useNavigation();
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
   return (
@@ -73,7 +75,7 @@ export default function Login() {
             <TouchableOpacity className="items-center">
               <Text className="font-medium text-[10.5px] text-white mx-9">비밀번호 찾기</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="items-center">
+            <TouchableOpacity className="items-center" onPress={() => navigation.navigate('Nickname')}>
               <Text className="font-medium text-[10.5px] text-white">회원가입</Text>
             </TouchableOpacity>
           </View>
