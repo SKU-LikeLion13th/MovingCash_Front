@@ -1,16 +1,21 @@
 import React from "react";
 import { View } from "react-native";
 
+import Header from "src/components/Header";
 import MotivationText from "../Common/components/MotivationText";
-import ActivityTitle from "../Common/components/ActivityTitle";
 import RunningTracker from "./components/RunningTracker";
+import RunningPoints from "./components/RunningPoints";
 
 export default function Running() {
   return (
-    <View className="flex-1 bg-[#101010] pt-16 px-3">
-      <ActivityTitle activity="run" />
+    <View className="flex-1 bg-[#101010] px-3">
+      <Header title="Running" />
+
       <MotivationText activity="run" status="finish" />
+
       <RunningTracker />
+
+      <RunningPoints />
     </View>
   );
 }

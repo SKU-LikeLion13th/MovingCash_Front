@@ -35,7 +35,7 @@ export default function MotivationText({
 
   return (
     <View>
-      <Text className="text-center text-base text-white font-bold mt-10">
+      <Text className="text-center text-base text-white font-bold mt-4">
         {message}
       </Text>
     </View>

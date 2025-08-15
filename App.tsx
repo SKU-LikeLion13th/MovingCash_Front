@@ -12,6 +12,8 @@ import Id from "src/screens/Member/Id";
 import Pw from "src/screens/Member/Pw";
 import Start from "src/screens/Member/Start";
 
+import Running from "src/screens/Activity/Running/Running";
+
 // React Navigation에서는 Stack Navigator에 등록한 스크린 이름, 파라미터 타입을 먼저 정의하고,
 // useNavigation에 알려줘야해
 
@@ -30,6 +32,7 @@ export type RootStackParamList = {
   Id: undefined;
   Pw: undefined;
   Start: undefined;
+  Running: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -37,6 +40,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Running" component={Running} />
         {/* 호연 */}
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="PointMain" component={PointMain} />
@@ -50,6 +54,9 @@ export default function App() {
         <Stack.Screen name="Id" component={Id} />
         <Stack.Screen name="Pw" component={Pw} />
         <Stack.Screen name="Start" component={Start} />
+
+        {/* 혜원 */}
+        {/* <Stack.Screen name="Running" component={Running} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
