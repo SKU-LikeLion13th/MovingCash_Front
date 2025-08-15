@@ -92,7 +92,7 @@ export default function AvailablePoints() {
       </Text>
 
       <View className="flex-1 items-center">
-        <ScrollView className="space-y-5 mt-8 flex-1 pt-5 mb-28 bg-[#f9f9f9] rounded-2xl w-[95%]">
+        <ScrollView className="space-y-5 mt-8 flex-1 pt-5 mb-8 bg-[#f9f9f9] rounded-2xl w-[95%]">
           {missions.map((mission, index) => {
             const btnStyle = getButtonStyle(mission.btnType);
             return (

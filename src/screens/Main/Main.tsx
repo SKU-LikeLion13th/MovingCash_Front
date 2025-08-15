@@ -17,6 +17,9 @@ export default function Main() {
       <View className="mt-8">
         <RecentMoving />
       </View>
+      <View className="mt-8">
+        <StartNow />
+      </View>
     </View>
   );
 }

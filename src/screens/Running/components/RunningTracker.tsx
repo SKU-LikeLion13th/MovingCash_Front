@@ -1,0 +1,283 @@
+import { View, Text, Pressable } from "react-native";
+import Svg, {
+  Circle,
+  Defs,
+  Path,
+  LinearGradient,
+  Stop,
+} from "react-native-svg";
+import React, { useState } from "react";
+import RunningMotivation from "./RunningMotivation";
+
+type StatusType = "start" | "ongoing" | "stop" | "finish";
+
+export default function RunningTracker() {
+  const [status, setStatus] = useState<StatusType>("start");
+
+  const size = 180;
+  const strokeWidth = 9;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  // 상태 전환 로직
+  const handleStart = () => setStatus("ongoing");
+  const handlePause = () => setStatus("stop");
+  const handleResume = () => setStatus("ongoing");
+  const handleFinish = () => setStatus("finish");
+
+  // 상태별 원 UI
+  const renderStart = () => (
+    <>
+      <RunningMotivation status="start" />
+      <View className="mt-12 items-center justify-center">
+        <Svg width={size} height={size}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#E9690D"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
+          />
+        </Svg>
+        <Text className="absolute text-[43px] text-white font-bold">Start</Text>
+      </View>
+    </>
+  );
+
+  const renderOngoing = () => {
+    const createArcPath = (
+      startAngle: number,
+      endAngle: number,
+      radius: number,
+      centerX: number,
+      centerY: number
+    ): string => {
+      const start = polarToCartesian(centerX, centerY, radius, endAngle);
+      const end = polarToCartesian(centerX, centerY, radius, startAngle);
+      const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+      return [
+        "M",
+        start.x,
+        start.y,
+        "A",
+        radius,
+        radius,
+        0,
+        largeArcFlag,
+        0,
+        end.x,
+        end.y,
+      ].join(" ");
+    };
+
+    const polarToCartesian = (
+      centerX: number,
+      centerY: number,
+      radius: number,
+      angleInDegrees: number
+    ): { x: number; y: number } => {
+      const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+      return {
+        x: centerX + radius * Math.cos(angleInRadians),
+        y: centerY + radius * Math.sin(angleInRadians),
+      };
+    };
+
+    const centerX: number = size / 2;
+    const centerY: number = size / 2;
+    const totalDegrees: number = -270; // 75% 원
+    const segments: number = 60; // 그라데이션 세그먼트 수
+    const degreesPerSegment: number = totalDegrees / segments;
+
+    return (
+      <>
+        <RunningMotivation status="ongoing" />
+        <View className="mt-12 items-center justify-center">
+          <Svg width={size} height={size}>
+            <Defs>
+              {/* 각 세그먼트별 그라데이션 생성 */}
+              {Array.from({ length: segments }, (_, i: number) => {
+                const opacity: number = 1 - i / segments;
+                const color: string = `rgba(233, 105, 13, ${opacity})`;
+                const whiteBlend: number = Math.min(1, i / (segments * 0.7));
+                const finalColor: string = `rgb(${
+                  233 + (255 - 233) * whiteBlend
+                }, ${105 + (255 - 105) * whiteBlend}, ${
+                  13 + (255 - 13) * whiteBlend
+                })`;
+
+                return (
+                  <LinearGradient
+                    key={i}
+                    id={`grad${i}`}
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%">
+                    <Stop offset="0%" stopColor={finalColor} />
+                    <Stop offset="100%" stopColor={finalColor} />
+                  </LinearGradient>
+                );
+              })}
+            </Defs>
+
+            {/* 여러 Path로 그라데이션 원 그리기 */}
+            {Array.from({ length: segments }, (_, i: number) => {
+              const startAngle: number = i * degreesPerSegment;
+              const endAngle: number = (i + 1) * degreesPerSegment;
+              const whiteBlend: number = i / (segments - 1);
+              const r: number = Math.round(233 + (255 - 233) * whiteBlend);
+              const g: number = Math.round(105 + (255 - 105) * whiteBlend);
+              const b: number = Math.round(13 + (255 - 13) * whiteBlend);
+              const color: string = `rgb(${r}, ${g}, ${b})`;
+
+              return (
+                <Path
+                  key={i}
+                  d={createArcPath(
+                    startAngle,
+                    endAngle,
+                    radius,
+                    centerX,
+                    centerY
+                  )}
+                  stroke={color}
+                  strokeWidth={strokeWidth}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              );
+            })}
+          </Svg>
+          <Text className="absolute text-[43px] text-white font-bold">
+            1.2 <Text className="text-4xl">km</Text>
+          </Text>
+        </View>
+      </>
+    );
+  };
+
+  const renderStop = () => (
+    <>
+      <RunningMotivation status="stop" />
+      <View className="mt-12 items-center justify-center">
+        <Svg width={size} height={size}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#939393"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
+          />
+        </Svg>
+        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+          Stop
+        </Text>
+        <Text className="absolute bottom-11 text-sm text-white">1.2km</Text>
+      </View>
+    </>
+  );
+
+  const renderFinish = () => (
+    <>
+      <RunningMotivation status="finish" />
+      <View className="mt-12 items-center justify-center">
+        <Svg width={size} height={size}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#FFFFFF"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${circumference * 0.5}, ${circumference * 0.25}`}
+          />
+        </Svg>
+        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+          Finish!
+        </Text>
+        <Text className="absolute bottom-11 text-sm text-[#E9690D]">1.2km</Text>
+      </View>
+    </>
+  );
+
+  const renderByStatus = () => {
+    switch (status) {
+      case "start":
+        return renderStart();
+      case "ongoing":
+        return renderOngoing();
+      case "stop":
+        return renderStop();
+      case "finish":
+        return renderFinish();
+      default:
+        return null;
+    }
+  };
+
+  /** ----- 버튼 UI ----- */
+  const renderButtons = () => {
+    switch (status) {
+      case "start":
+        return (
+          <Pressable
+            onPress={handleStart}
+            className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
+            <Text className="text-white font-bold">시작하기</Text>
+          </Pressable>
+        );
+      case "ongoing":
+        return (
+          <View className="flex-row justify-around w-full mt-3">
+            <Pressable
+              onPress={handleFinish}
+              className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
+              <Text className="text-white font-bold">종료하기</Text>
+            </Pressable>
+            <Pressable
+              onPress={handlePause}
+              className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
+              <Text className="text-white font-bold">일시정지</Text>
+            </Pressable>
+          </View>
+        );
+      case "stop":
+        return (
+          <View className="flex-row justify-around w-full mt-3">
+            <Pressable
+              onPress={handleFinish}
+              className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
+              <Text className="text-white font-bold">종료하기</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleResume}
+              className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
+              <Text className="text-white font-bold">이어달리기</Text>
+            </Pressable>
+          </View>
+        );
+      case "finish":
+        return null; // 버튼 없음
+    }
+  };
+
+  return (
+    <View>
+      <View className="items-center justify-center">{renderByStatus()}</View>
+      <View
+        className={`flex-row justify-around ${
+          status == "finish" ? "mt-1.5" : "mt-8"
+        } px-8`}>
+        {renderButtons()}
+      </View>
+    </View>
+  );
+}

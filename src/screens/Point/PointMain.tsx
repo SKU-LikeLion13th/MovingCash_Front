@@ -4,11 +4,11 @@ import Header from "src/components/Header";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { RootStackParamList } from "App";
+import { MainStackParamList } from "App";
 
 export default function PointMain() {
   // 2. useNavigation에 타입 적용
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
   const missions = [
     {
@@ -20,7 +20,6 @@ export default function PointMain() {
       imageHeight: 80,
       btnText: "포인트 받기",
       btnBg: "#E9690D",
-      textPadding: 28,
       btnTextColor: "#ffffff",
     },
     {
@@ -32,7 +31,6 @@ export default function PointMain() {
       imageHeight: 140,
       btnText: "달성 가능",
       btnBg: "#DBDBDB",
-      textPadding: 20,
       btnTextColor: "#707070",
     },
   ];
@@ -81,7 +79,7 @@ export default function PointMain() {
         </View>
 
         {/* 포인트 받기 미션 */}
-        <View className="mt-12 space-y-6">
+        <View className="mt-8 space-y-4">
           {missions.map((mission, index) => (
             <View
               key={index}
