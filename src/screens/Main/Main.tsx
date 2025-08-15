@@ -17,7 +17,7 @@ export default function Main() {
       <View className="mt-8">
         <RecentMoving />
       </View>
-      {/* 여기 쨰꾸미 지도 들어갈 자리 ! */}
+      <Text className="mt-8 text-white">여기 지도 넣을거임!!!!!!!</Text>
       <View className="mt-8">
         <StartNow />
       </View>
