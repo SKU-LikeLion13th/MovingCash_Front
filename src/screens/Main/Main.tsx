@@ -17,10 +17,6 @@ export default function Main() {
       <View className="mt-8">
         <RecentMoving />
       </View>
-      <Text className="mt-8 text-white">여기 지도 넣을거임!!!!!!!</Text>
-      <View className="mt-8">
-        <StartNow />
-      </View>
     </View>
   );
 }
