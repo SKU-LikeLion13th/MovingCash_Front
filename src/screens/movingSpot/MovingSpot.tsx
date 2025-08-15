@@ -3,9 +3,9 @@ import { Text, View } from "react-native";
 
 const MovingSpot = () => {
     return (
-        <Text className='bg-black h-full'>
-            되나?
-        </Text>
+        <View className='bg-black h-full'>
+            <Text className='text-3xl'>되나?</Text>
+        </View>
     );
 };
 

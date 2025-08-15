@@ -1,30 +1,31 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-// import { useNavigate } from "react-router-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { MainStackParamList } from "App";
 
 export default function StartNow() {
-  // const navigate = useNavigate();
+const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
   const items = [
     {
       src: require("../../../assets/images/Walking.png"),
       label: "Walking",
-      route: "/walking",
+      route: "Walking",
     },
     {
       src: require("../../../assets/images/Running.png"),
       label: "Running",
-      route: "/running",
+      route: "Running",
     },
     {
       src: require("../../../assets/images/MovingSpot.png"),
       label: "Challenge",
-      route: "/challenge",
+      route: "Challenge",
     },
     {
       src: require("../../../assets/images/MovingSpot.png"),
       label: "Moving spot",
-      route: "/movingspot",
+      route: "MovingSpot",
     },
   ];
 
@@ -41,7 +42,7 @@ export default function StartNow() {
               <TouchableOpacity
                 key={index}
                 className="items-center bg-[#1F1F1F66] w-[48%] py-2.5 border border-[#FFFFFF26] rounded-xl"
-                // onPress={() => navigate(item.route)}
+                onPress={() => navigation.navigate(item.route as keyof MainStackParamList)}
               >
                 <Image
                   source={item.src}
