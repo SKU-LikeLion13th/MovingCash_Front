@@ -3,8 +3,7 @@ import { View, Text, Image } from "react-native";
 import Profile from "./Profile";
 import WeeklyRunning from "./WeeklyRunning";
 import RecentMoving from "./RecentMoving";
-import NavigateButton from "../Activity/Running/NavigateButton";
-import Running from "../Activity/Running/Running";
+import NavigateButton from "../Activity/Common/components/NavigateButton";
 
 export default function Main() {
   return (
@@ -17,6 +16,10 @@ export default function Main() {
       </View>
       <View className="mt-2">
         <RecentMoving />
+      </View>
+
+      <View>
+        <NavigateButton />
       </View>
     </View>
   );
