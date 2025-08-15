@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { useNavigate } from "react-router-native";
+// import { useNavigate } from "react-router-native";
 
 export default function StartNow() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const items = [
     {
@@ -41,7 +41,7 @@ export default function StartNow() {
               <TouchableOpacity
                 key={index}
                 className="items-center bg-[#1F1F1F66] w-[48%] py-2.5 border border-[#FFFFFF26] rounded-xl"
-                onPress={() => navigate(item.route)}
+                // onPress={() => navigate(item.route)}
               >
                 <Image
                   source={item.src}
