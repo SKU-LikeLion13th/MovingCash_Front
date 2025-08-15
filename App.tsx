@@ -22,14 +22,13 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={Login} />
         {/* 호연 */}
         <Stack.Screen name="PointMain" component={PointMain} />
         <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="AvailablePoints" component={AvailablePoints} />
         {/* 유정 */}
         <Stack.Screen name="Splash" component={Splash} />
-        {/* <Stack.Screen name="Login" component={Login} /> */}
+        <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Nickname" component={Nickname} />
         <Stack.Screen name="Id" component={Id} />
         <Stack.Screen name="Pw" component={Pw} />
