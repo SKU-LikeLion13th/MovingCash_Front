@@ -79,8 +79,6 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingBottom: 30,
     backgroundColor: "#101010",
-    borderTopWidth: 1,
-    borderTopColor: "#222222",
   },
   tabButton: { flex: 1, alignItems: "center" },
   iconContainer: { alignItems: "center", width: 60 },
