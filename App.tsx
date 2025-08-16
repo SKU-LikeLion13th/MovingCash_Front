@@ -12,6 +12,9 @@ import Challenge from "src/screens/Challenge/Challenge";
 import MovingSpot from "src/screens/movingSpot/MovingSpot";
 
 import Store from "src/screens/Store/Store";
+import ExchangeDetail from "src/screens/Store/ExchangeDetail";
+import UseCoupon from "src/screens/Store/UseCoupon";
+import UseCouponDetail from "src/screens/Store/UseCouponDetail";
 import PointMain from "src/screens/Point/PointMain";
 import MyPage from "src/screens/MyPage/MyPage";
 import AvailablePoints from "src/screens/Point/AvailablePoints";
@@ -55,6 +58,9 @@ export type MainStackParamList = {
 
 export type StoreStackParamList = {
   Store: undefined;
+  ExchangeDetail: { item: any };
+  UseCoupon: undefined;
+  UseCouponDetail: undefined;
 };
 
 export type PointStackParamList = {
@@ -107,6 +113,9 @@ function StoreStackScreen() {
   return (
     <StoreStack.Navigator screenOptions={{ headerShown: false }}>
       <StoreStack.Screen name="Store" component={Store} />
+      <StoreStack.Screen name="ExchangeDetail" component={ExchangeDetail} />
+      <StoreStack.Screen name="UseCoupon" component={UseCoupon} />
+      <StoreStack.Screen name="UseCouponDetail" component={UseCouponDetail} />
     </StoreStack.Navigator>
   );
 }
@@ -135,7 +144,8 @@ export default function App() {
       <Tab.Navigator
         initialRouteName="MainTab"
         tabBar={(props) => <Bar {...props} />}
-        screenOptions={{ headerShown: false }}>
+        screenOptions={{ headerShown: false }}
+      >
         <Tab.Screen
           name="MainTab"
           component={MainStackScreen}
