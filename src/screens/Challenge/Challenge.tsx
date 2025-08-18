@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { SvgProps } from "react-native-svg";
 import {
   View,
   Text,
@@ -7,12 +8,18 @@ import {
   FlatList,
   Dimensions,
   ImageSourcePropType,
+  ImageStyle,
 } from "react-native";
 import Header from "src/components/Header";
 import ChallengeCard from "./ChallengeCard";
+import Point from "../../../assets/icons/Point.svg";
 
 type LevelCode = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 type ActivityCode = "RUNNING" | "WALKING";
+type ActivityImage = {
+  src: ImageSourcePropType;
+  style?: ImageStyle; // 이미지마다 스케일/마진 보정
+};
 
 type ChallengeItem = {
   id: number;
@@ -37,14 +44,20 @@ const ACTIVITY_KR: Record<ActivityCode, "러닝" | "걷기"> = {
 // 카드 사이즈랑 배경색
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const H_PADDING = 24;
-const GAP = 10;
+const GAP = 15;
 const CARD_WIDTH = (SCREEN_WIDTH - H_PADDING * 2 - GAP) / 2;
-const CARD_HEIGHT = 240;
-const BG_COLORS = ["#CFE8FF", "#FFE68A", "#FFD3B6", "#E2FFD1"];
+const CARD_HEIGHT = 260;
+const BG_COLORS = ["#B8DDFF", "#F9E482", "#FFBF92", "#E7F982"];
 
-const IMAGE_BY_ACTIVITY: Record<ActivityCode, ImageSourcePropType> = {
-  RUNNING: require("../../../assets/images/Challenge/Running.png"),
-  WALKING: require("../../../assets/images/Challenge/Running.png"),
+const IMAGE_BY_ACTIVITY: Record<ActivityCode, ActivityImage> = {
+  RUNNING: {
+    src: require("../../../assets/images/Challenge/Running.png"),
+    style: { width: "75%", height: "75%" },
+  },
+  WALKING: {
+    src: require("../../../assets/images/Challenge/walking.png"),
+    style: { width: "75%", height: "75%", marginRight: 22 },
+  },
 };
 
 //더미데이터
@@ -225,14 +238,16 @@ export default function Challenge() {
     index: number;
   }) => {
     const bg = BG_COLORS[index % BG_COLORS.length];
-    const imageSource = IMAGE_BY_ACTIVITY[item.activity];
+    const { src, style: imgStyle } = IMAGE_BY_ACTIVITY[item.activity];
+
     return (
       <ChallengeCard
         item={item}
         width={CARD_WIDTH}
         height={CARD_HEIGHT}
         bgColor={bg}
-        imageSource={imageSource}
+        imageSource={src}
+        imageStyle={imgStyle}
         onPress={() => {}}
       />
     );
@@ -241,41 +256,70 @@ export default function Challenge() {
   return (
     <View className="flex-1 bg-[#101010]">
       <Header title="Challenge" />
-
-      <View className="w-full items-center mb-4">
-        <Image
-          source={require("../../../assets/images/Challenge/shoesAD.png")}
-          className="w-96"
-          resizeMode="contain"
-        />
-      </View>
-
-      <View className="flex-1 bg-white rounded-t-3xl pt-8">
-        <FlatList
-          data={data}
-          keyExtractor={(it) => String(it.id)}
-          renderItem={renderItem}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: "space-between" }}
-          contentContainerStyle={{
-            paddingTop: 12,
-            paddingBottom: 48,
-            paddingHorizontal: H_PADDING,
-          }}
-          style={{ alignSelf: "stretch" }}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <>
-              {/* 상단 문구 */}
+      <FlatList
+        data={data}
+        keyExtractor={(it) => String(it.id)}
+        renderItem={renderItem}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        style={{ flex: 1, alignSelf: "stretch", backgroundColor: "#fff" }}
+        contentContainerStyle={{
+          paddingBottom: 15,
+          paddingHorizontal: H_PADDING,
+          rowGap: 5,
+        }}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <>
+            <View
+              style={{
+                backgroundColor: "#101010",
+                paddingBottom: 0,
+                marginHorizontal: -H_PADDING,
+              }}
+            >
+              <View className="w-full items-center mb-4">
+                <Image
+                  source={require("../../../assets/images/Challenge/shoesAD.png")}
+                  style={{ width: "95%", height: 120, marginBottom: 20 }}
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderTopLeftRadius: 30,
+                borderTopRightRadius: 30,
+                marginTop: -25, // 배너와 자연스럽게 겹치기
+                paddingTop: 40,
+                marginHorizontal: -H_PADDING,
+              }}
+            >
               <View className="w-full items-center">
-                <Text className="font-extrabold">챌린지에 도전하면,</Text>
-                <Text className="pt-[14px] text-[22px] font-black">
-                  12,140 더 받을 수 있어요!
-                </Text>
+                <Text className="font-extrabold mb-3">챌린지에 도전하면,</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    columnGap: 8, 
+                  }}
+                >
+                  <Point width={25} height={25} />
+                  <Text
+                    className="font-black"
+                    style={{
+                      fontSize: 22,
+                      transform: [{ translateY: -0.5 }], 
+                    }}
+                  >
+                    12,140 더 받을 수 있어요!
+                  </Text>
+                </View>
               </View>
 
               {/* 필터 영역 */}
-              <View className="w-full my-5 items-center px-6">
+              <View className="w-full mt-5 mb-3 items-center">
                 <View className="flex-row flex-wrap">
                   <Chip
                     label="전체"
@@ -311,10 +355,10 @@ export default function Challenge() {
                   ))}
                 </View>
               </View>
-            </>
-          }
-        />
-      </View>
+            </View>
+          </>
+        }
+      />
     </View>
   );
 }

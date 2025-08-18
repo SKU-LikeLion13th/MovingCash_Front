@@ -5,6 +5,7 @@ import {
   Image,
   Pressable,
   ImageSourcePropType,
+  ImageStyle,
 } from "react-native";
 
 type LevelCode = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
@@ -35,6 +36,7 @@ type Props = {
   height: number;
   bgColor: string;
   imageSource: ImageSourcePropType;
+  imageStyle?: ImageStyle;
   onPress?: (item: ChallengeItem) => void;
   className?: string;
 };
@@ -45,35 +47,28 @@ export default function ChallengeCard({
   height,
   bgColor,
   imageSource,
+  imageStyle,
   onPress,
   className,
-}: Props) 
-
-{
+}: Props) {
   return (
     <Pressable
       style={{
-        position: "relative", 
+        position: "relative",
         width,
         height,
         backgroundColor: bgColor,
         borderRadius: 16,
         marginBottom: 12,
-        overflow: "hidden", 
+        overflow: "hidden",
         elevation: 2,
       }}
       className={["shadow", className ?? ""].join(" ")}
       onPress={() => onPress?.(item)}
     >
-      <Image
-        source={imageSource}
-        style={{
-          width: width*0.7,
-          height: undefined,
-          aspectRatio: 1,
-        }}
-        resizeMode="contain"
-      />
+      <View className="w-full items-center mt-5">
+        <Image source={imageSource} style={[imageStyle]} resizeMode="contain" />
+      </View>
 
       {/*참여 여부 띄우기*/}
       {item.status && (
@@ -88,8 +83,8 @@ export default function ChallengeCard({
           {item.title}
         </Text>
 
-        <View className="flex-row items-center mt-1">
-          <Text className="text-[20px] font-extrabold text-black">
+        <View className="flex-row items-center mb-1">
+          <Text className="text-[24px] font-bold text-black">
             {item.reward.toLocaleString()}
           </Text>
           <Text className="ml-1 text-[12px] font-bold text-[#E59A00]">P</Text>
