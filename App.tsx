@@ -9,6 +9,7 @@ import Main from "src/screens/Main/Main";
 import Walking from "src/screens/Walking/Walking";
 import Running from "src/screens/Running/Running";
 import Challenge from "src/screens/Challenge/Challenge";
+import ChallengeDetail from "src/screens/Challenge/ChallengeDetail";
 import MovingSpot from "src/screens/movingSpot/MovingSpot";
 
 import Store from "src/screens/Store/Store";
@@ -53,6 +54,12 @@ export type MainStackParamList = {
   Walking: undefined;
   Running: undefined;
   Challenge: undefined;
+  ChallengeDetail: {
+    id: number;
+    title: string;
+    reward: number;
+    activity: string;
+  };
   MovingSpot: undefined;
 };
 
@@ -104,6 +111,7 @@ function MainStackScreen() {
       <MainStack.Screen name="Walking" component={Walking} />
       <MainStack.Screen name="Running" component={Running} />
       <MainStack.Screen name="Challenge" component={Challenge} />
+      <MainStack.Screen name="ChallengeDetail" component={ChallengeDetail} />
       <MainStack.Screen name="MovingSpot" component={MovingSpot} />
     </MainStack.Navigator>
   );

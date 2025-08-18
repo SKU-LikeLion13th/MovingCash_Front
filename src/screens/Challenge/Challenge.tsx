@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { SvgProps } from "react-native-svg";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 import Header from "src/components/Header";
 import ChallengeCard from "./ChallengeCard";
 import Point from "../../../assets/icons/Point.svg";
+import { MainStackParamList } from "App"; 
 
 type LevelCode = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 type ActivityCode = "RUNNING" | "WALKING";
@@ -184,6 +185,17 @@ function filterItems(
 }
 
 export default function Challenge() {
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+
+  //네비게이트(props 내용 넘겨야함)
+  const handlePress = React.useCallback((item: ChallengeItem) => {
+    navigation.navigate("ChallengeDetail", {
+      id: item.id,
+      title: item.title,
+      reward: item.reward,
+      activity: item.activity,
+    });
+  }, [navigation]);
   // 레벨/액티비티 각각 다중선택
   const [selectedLevels, setSelectedLevels] = useState<LevelCode[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<ActivityCode[]>(
@@ -248,7 +260,7 @@ export default function Challenge() {
         bgColor={bg}
         imageSource={src}
         imageStyle={imgStyle}
-        onPress={() => {}}
+        onPress={handlePress}
       />
     );
   };
