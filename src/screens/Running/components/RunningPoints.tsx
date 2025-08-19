@@ -4,7 +4,7 @@ import Svg, { Circle, Path } from "react-native-svg";
 
 export default function RunningPoints() {
   return (
-    <View className="my-9">
+    <View className="my-10">
       {/* 현재 보유 포인트 */}
       <View className="flex-row items-center justify-center">
         <Text className="text-white font-bold text-[12px]">
