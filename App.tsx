@@ -13,9 +13,9 @@ import ChallengeDetail from "src/screens/Challenge/ChallengeDetail";
 import MovingSpot from "src/screens/movingSpot/MovingSpot";
 
 import Store from "src/screens/Store/Store";
-import ExchangeDetail from "src/screens/Store/ExchangeDetail";
-import UseCoupon from "src/screens/Store/UseCoupon";
-import UseCouponDetail from "src/screens/Store/UseCouponDetail";
+import ExchangeDetail from "src/screens/Store/CouponDetail/ExchangeDetail";
+import UseCoupon from "src/screens/Store/MyCoupon/UseCoupon";
+import UseCouponDetail from "src/screens/Store/CouponDetail/UseCouponDetail";
 import PointMain from "src/screens/Point/PointMain";
 import MyPage from "src/screens/MyPage/MyPage";
 import AvailablePoints from "src/screens/Point/AvailablePoints";
@@ -67,7 +67,7 @@ export type StoreStackParamList = {
   Store: undefined;
   ExchangeDetail: { item: any };
   UseCoupon: undefined;
-  UseCouponDetail: undefined;
+  UseCouponDetail: { coupon: any };
 };
 
 export type PointStackParamList = {
