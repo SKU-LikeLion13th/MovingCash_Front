@@ -22,8 +22,8 @@ export default function Header({
   };
 
   return (
-    <SafeAreaView className="bg-[#101010]">
-      <View className="flex-row items-center justify-center py-4 px-4">
+    <SafeAreaView className="bg-[#101010] py-5" edges={["top"]}>
+      <View className="flex-row items-center justify-center px-4">
         {/* 뒤로가기 */}
         {showBack && (
           <TouchableOpacity

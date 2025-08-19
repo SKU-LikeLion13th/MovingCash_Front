@@ -7,7 +7,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 type Props = NativeStackScreenProps<StoreStackParamList, "ExchangeDetail">;
 
-export default function ExchangeDetail({ route }: Props) {
+export default function ExchangeDetail({ route, navigation }: Props) {
   const { item } = route.params;
   const [agreed, setAgreed] = useState(false);
   const [exchanged, setExchanged] = useState(false); // 교환 완료 상태
@@ -28,9 +28,7 @@ export default function ExchangeDetail({ route }: Props) {
   return (
     <View className="h-full bg-[#101010]">
       <Header title="상점" showImage={true} />
-      <View className="bg-white h-full rounded-t-3xl py-8 px-4 ">
-        {/* 상품 정보 */}
-        {/* 위 */}
+      <View className="bg-white h-full rounded-t-3xl py-8 px-4">
         {/* 상품 정보 + 포인트 */}
         <View className="space-y-8">
           {exchanged ? (
@@ -45,7 +43,7 @@ export default function ExchangeDetail({ route }: Props) {
               <View className="w-full h-[0.5px] bg-[#999999] my-4" />
 
               {/* 교환 후 포인트 */}
-              <View className="mt-4 space-y-2 w-full">
+              <View className="mt-4 space-y-2 w-full px-2">
                 <View className="flex-row justify-between">
                   <Text className="text-[#686868] text-[15px]">사용처</Text>
                   <Text className="text-[#101010] text-[15px] font-semibold">
@@ -93,7 +91,7 @@ export default function ExchangeDetail({ route }: Props) {
               <View className="w-full h-[0.5px] bg-[#999999]" />
 
               {/* 기존 포인트 */}
-              <View className="mt-8 space-y-3">
+              <View className="mt-8 space-y-3 px-2">
                 <View className="flex-row justify-between">
                   <Text className="text-[#686868] text-[15px]">
                     보유 포인트
@@ -125,7 +123,7 @@ export default function ExchangeDetail({ route }: Props) {
 
         {/* 약관 동의 */}
         {!exchanged && (
-          <View className="flex-row self-center mt-16">
+          <View className="flex-row self-center mt-20">
             <View className="flex-col items-center">
               <View className="flex-row items-center">
                 <Text onPress={() => setAgreed(!agreed)} className="mr-1">
@@ -156,10 +154,16 @@ export default function ExchangeDetail({ route }: Props) {
         )}
 
         {/* 교환 버튼 */}
-        <View className="flex-1 justify-end mb-28">
+        <View className="flex-1 justify-end mb-24">
           <TouchableOpacity
-            disabled={!agreed && !exchanged} // 교환 완료 전에는 약관 필수
-            onPress={handleExchange}
+            disabled={!agreed && !exchanged}
+            onPress={() => {
+              if (exchanged) {
+                navigation.navigate("UseCouponDetail", { coupon: item }); // ✅ 이동
+              } else {
+                handleExchange();
+              }
+            }}
             className={`py-4 rounded-xl items-center mb-4 ${
               agreed || exchanged ? "bg-[#E9690D]" : "bg-[#D9D9D9]"
             }`}

@@ -1,14 +1,35 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+} from "react-native";
 import Header from "src/components/Header";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
 
 export default function AvailablePoints() {
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const handleGetPoint = (message: string) => {
+    setPopupMessage(message);
+    setShowPopup(true);
+  };
+
+  const [popupData, setPopupData] = useState<{
+    title: string;
+    point: string;
+  } | null>(null);
+
   const missions = [
     {
       title: "Moving 스팟 둘러보고",
       point: "바로 30P 받기",
       btnText: "포인트 받기",
-      btnType: "getPoint", // 참여하기: participate, 참여완료: done, 포인트받기: getPoint
+      btnType: "getPoint",
       image: require("../../../assets/images/AvailablePoints/explore_spot.png"),
     },
     {
@@ -108,6 +129,15 @@ export default function AvailablePoints() {
                       </Text>
                       <TouchableOpacity
                         className="rounded-full px-2 py-1 ml-3"
+                        onPress={() => {
+                          if (mission.btnType === "getPoint") {
+                            setPopupData({
+                              title: mission.title,
+                              point: mission.point,
+                            });
+                            setShowPopup(true);
+                          }
+                        }}
                         style={{
                           backgroundColor: btnStyle.backgroundColor,
                           borderWidth: btnStyle.borderWidth,
@@ -139,6 +169,53 @@ export default function AvailablePoints() {
           })}
         </ScrollView>
       </View>
+
+      <Modal
+        visible={showPopup}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPopup(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View
+            className=" p-6 rounded-lg w-[80%] "
+            style={{ backgroundColor: "rgba(21, 21, 21, 0.97)" }}
+          >
+            <TouchableOpacity
+              className="absolute top-4 right-4"
+              onPress={() => setShowPopup(false)}
+            >
+              <Feather name="x" size={24} color="white" />
+            </TouchableOpacity>
+
+            <View className="items-center">
+              <Image
+                source={require("assets/images/money.png")}
+                className="w-[181px] h-[181px]"
+              />
+              {popupData && (
+                <>
+                  <Text className="text-[#999999] text-[14px] mb-2">
+                    {popupData.title}
+                  </Text>
+                  <Text className="text-white text-[22px] font-semibold mb-6">
+                    {popupData.point.replace(/[^0-9P]/g, "")} 받았어요!
+                  </Text>
+                </>
+              )}
+              <TouchableOpacity
+                className="flex-row items-center"
+                onPress={() => setShowPopup(false)}
+              >
+                <Text className="text-[#D4D4D4] text-[16px] mr-1">
+                  확인하러 가기
+                </Text>
+                <AntDesign name="right" size={12} color={`#D4D4D4`} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
