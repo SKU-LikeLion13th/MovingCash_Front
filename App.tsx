@@ -1,4 +1,5 @@
 import React from "react";
+import "react-native-gesture-handler";
 import {
   NavigationContainer,
   getFocusedRouteNameFromRoute,
@@ -146,41 +147,45 @@ function MyPageStackScreen() {
   );
 }
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 export default function App() {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        initialRouteName="MainTab"
-        tabBar={(props) => <Bar {...props} />}
-        screenOptions={{ headerShown: false }}
-      >
-        <Tab.Screen
-          name="MainTab"
-          component={MainStackScreen}
-          options={{ title: "메인" }}
-        />
-        <Tab.Screen
-          name="StoreTab"
-          component={StoreStackScreen}
-          options={{ title: "상점" }}
-        />
-        <Tab.Screen
-          name="PointTab"
-          component={PointStackScreen}
-          options={{ title: "포인트" }}
-        />
-        <Tab.Screen
-          name="MyPageTab"
-          component={MyPageStackScreen}
-          options={{ title: "마이페이지" }}
-        />
-        <Tab.Screen
-          name="StartTab"
-          component={StartStackScreen}
-          options={{ title: "시작화면" }}
-          //시작화면은 일단 작업할때 사용하고 나중에 수정합시당
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Tab.Navigator
+          initialRouteName="MainTab"
+          tabBar={(props) => <Bar {...props} />}
+          screenOptions={{ headerShown: false }}
+        >
+          <Tab.Screen
+            name="MainTab"
+            component={MainStackScreen}
+            options={{ title: "메인" }}
+          />
+          <Tab.Screen
+            name="StoreTab"
+            component={StoreStackScreen}
+            options={{ title: "상점" }}
+          />
+          <Tab.Screen
+            name="PointTab"
+            component={PointStackScreen}
+            options={{ title: "포인트" }}
+          />
+          <Tab.Screen
+            name="MyPageTab"
+            component={MyPageStackScreen}
+            options={{ title: "마이페이지" }}
+          />
+          <Tab.Screen
+            name="StartTab"
+            component={StartStackScreen}
+            options={{ title: "시작화면" }}
+            //시작화면은 일단 작업할때 사용하고 나중에 수정합시당
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
