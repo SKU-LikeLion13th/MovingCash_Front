@@ -3,7 +3,7 @@ import React from "react";
 
 export default function RunningDetail() {
   return (
-    <View className="px-2 space-y-4">
+    <View className="pb-10 px-2 space-y-4">
       <View className="py-5 flex-row border border-[#FFFFFF18] rounded-2xl">
         <View className="flex-1 flex-row items-center px-7 border-r border-[#FFFFFF18]">
           <View className="flex items-center justify-center mr-3">

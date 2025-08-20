@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Animated } from "react-native";
+import { View, Text, TouchableOpacity, Animated } from "react-native";
 import Svg, {
   Circle,
   Defs,
@@ -365,40 +365,40 @@ export default function WalkingTracker() {
     switch (status) {
       case "start":
         return (
-          <Pressable
+          <TouchableOpacity
             onPress={handleStart}
             className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
             <Text className="text-white font-bold">시작하기</Text>
-          </Pressable>
+          </TouchableOpacity>
         );
       case "ongoing":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handlePause}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">일시정지</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       case "stop":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handleResume}
               className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
               <Text className="text-white font-bold">이어서 걷기</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       case "finish":
