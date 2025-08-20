@@ -24,6 +24,7 @@ import MyPage from "src/screens/MyPage/MyPage";
 import AvailablePoints from "src/screens/Point/AvailablePoints";
 import UsePoint from "src/screens/Point/UsePoint";
 
+import Map from "src/components/Map";
 import Splash from "src/screens/Member/Splash";
 import Login from "src/screens/Member/Login";
 import Nickname from "src/screens/Member/Nickname";
@@ -42,6 +43,7 @@ export type RootTabParamList = {
 };
 
 export type StartStackParamList = {
+  Map: undefined;
   Splash: undefined;
   Login: undefined;
   Nickname: undefined;
@@ -101,6 +103,7 @@ const MyPageStack = createNativeStackNavigator<MyPageStackParamList>();
 function StartStackScreen() {
   return (
     <StartStack.Navigator screenOptions={{ headerShown: false }}>
+      <StartStack.Screen name="Map" component={Map} />
       <StartStack.Screen name="Splash" component={Splash} />
       <StartStack.Screen name="Login" component={Login} />
       <StartStack.Screen name="Nickname" component={Nickname} />
