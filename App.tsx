@@ -12,6 +12,8 @@ import Running from "src/screens/Running/Running";
 import Challenge from "src/screens/Challenge/Challenge";
 import ChallengeDetail from "src/screens/Challenge/ChallengeDetail";
 import MovingSpot from "src/screens/movingSpot/MovingSpot";
+import Onboarding from "src/screens/movingSpot/Onboarding";
+import MovingSpotResult from "src/screens/movingSpot/MovingSpotResult";
 
 import Store from "src/screens/Store/Store";
 import ExchangeDetail from "src/screens/Store/CouponDetail/ExchangeDetail";
@@ -62,6 +64,12 @@ export type MainStackParamList = {
     activity: string;
   };
   MovingSpot: undefined;
+  Onboarding: undefined;
+  MovingSpotResult: {
+    themes: string[];
+    difficulty: string[];
+    prefs: string[];
+  };
 };
 
 export type StoreStackParamList = {
@@ -114,6 +122,8 @@ function MainStackScreen() {
       <MainStack.Screen name="Challenge" component={Challenge} />
       <MainStack.Screen name="ChallengeDetail" component={ChallengeDetail} />
       <MainStack.Screen name="MovingSpot" component={MovingSpot} />
+      <MainStack.Screen name="Onboarding" component={Onboarding} />
+      <MainStack.Screen name="MovingSpotResult" component={MovingSpotResult} />
     </MainStack.Navigator>
   );
 }

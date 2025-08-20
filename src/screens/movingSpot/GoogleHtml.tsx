@@ -44,6 +44,7 @@ export const makeGoogleHtml = (BROWSER_KEY: string) => `
         case 'DRAW_ROUTE_POINTS': return drawRouteFromPoints(data.points||[]);
         case 'DRAW_ROUTE_POLYLINE': return drawPolylineEncoded(data.polyline);
         case 'SET_CURRENT': return setCurrent(data.lat, data.lng, data.accuracy, data.follow);
+        case 'FIND_DIRECTIONS': return findDirections(data); 
       }
     }
 
@@ -51,7 +52,11 @@ export const makeGoogleHtml = (BROWSER_KEY: string) => `
     function setMarkers(items){
       clearMarkers();
       items.forEach(it=>{
-        const pos = new google.maps.LatLng(it.lat, it.lng);
+        const lat = it.lat ?? it.latitude;
+        const lng = it.lng ?? it.longitude;
+        if(lat == null || lng == null) return;
+
+        const pos = new google.maps.LatLng(lat, lng);
         const marker = new google.maps.Marker({ position: pos, map });
         if(it.title){
           const iw = new google.maps.InfoWindow({ content: '<div class="label">'+it.title+'</div>' });
@@ -101,16 +106,87 @@ export const makeGoogleHtml = (BROWSER_KEY: string) => `
     function drawRouteFromPoints(points){
       if(routeLine) routeLine.setMap(null);
       const path = points.map(p=>({lat:p.lat, lng:p.lng}));
-      routeLine = new google.maps.Polyline({ map, path, strokeOpacity:0.9, strokeWeight:5 });
+      routeLine = new google.maps.Polyline({
+        map, path, strokeOpacity:0.9, strokeWeight:5, strokeColor:'#19C37D'
+      });
       const b = new google.maps.LatLngBounds(); path.forEach(p=>b.extend(p)); map.fitBounds(b);
     }
 
     function drawPolylineEncoded(encoded){
       const path = google.maps.geometry.encoding.decodePath(encoded);
       if(routeLine) routeLine.setMap(null);
-      routeLine = new google.maps.Polyline({ map, path, strokeOpacity:0.9, strokeWeight:5 });
+      routeLine = new google.maps.Polyline({
+        map, path, strokeOpacity:0.9, strokeWeight:5, strokeColor:'#19C37D'
+      });
       const b = new google.maps.LatLngBounds(); path.forEach(p=>b.extend(p)); map.fitBounds(b);
     }
+
+    // ★ 최단 경로 계산 후 초록색 라인으로 표시
+    function findDirections(data){
+      console.log("FIND_DIRECTIONS received data:", data);
+      if(!data || !data.origin || !data.destination) return;
+
+      const origin = new google.maps.LatLng(
+        data.origin.lat ?? data.origin.latitude,
+        data.origin.lng ?? data.origin.longitude
+      );
+      const destination = new google.maps.LatLng(
+        data.destination.lat ?? data.destination.latitude,
+        data.destination.lng ?? data.destination.longitude
+      );
+      const waypoints = (data.waypoints||[]).map(w => ({
+        location: new google.maps.LatLng(
+          w.lat ?? w.latitude,
+          w.lng ?? w.longitude
+        ),
+        stopover: true
+      }));
+
+      const req = {
+        origin,
+        destination,
+        waypoints,
+        optimizeWaypoints: true,
+        travelMode: (data.mode || 'WALKING'),
+        provideRouteAlternatives: false
+      };
+
+      directionsService.route(req, (res, status) => {
+        if (status !== 'OK' || !res || !res.routes || !res.routes[0]) {
+          post({ type: 'ERROR', msg: 'Directions failed', status, error_message: res && res.error_message });
+          return;
+        }
+        const r = res.routes[0];
+        const path = r.overview_path;
+
+        if(routeLine) routeLine.setMap(null);
+        routeLine = new google.maps.Polyline({
+          map,
+          path,
+          strokeOpacity: 0.95,
+          strokeWeight: 6,
+          strokeColor: '#19C37D' // 초록색
+        });
+
+        // bounds 맞추기
+        const b = new google.maps.LatLngBounds();
+        path.forEach(p => b.extend(p));
+        map.fitBounds(b);
+      });
+    }
+
+    window.onerror = function(msg, src, line, col, err){
+      post({ type:'ERROR', msg, src, line, col, stack: err && err.stack });
+    }
+    window.initMap = initMap;
+  </script>
+
+  <!-- geometry 라이브러리 포함(폴리라인 디코딩용) -->
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=${BROWSER_KEY}&callback=initMap&libraries=geometry">
+  </script>
+</body>
+</html>
 
     window.onerror = function(msg, src, line, col, err){
       post({ type:'ERROR', msg, src, line, col, stack: err && err.stack });

@@ -5,30 +5,40 @@ import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
-  ScrollView,
   Image,
-} from "react-native"; // ⭐
+} from "react-native";
 import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
 import Header from "src/components/Header";
 import { makeGoogleHtml } from "./GoogleHtml";
 import Search from "../../../assets/images/MovingSpot/Search.svg";
+import Constants from "expo-constants";
 
 //바텀시트
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
-const BROWSER_KEY = "AIzaSyBeA62rKEd_2XObakQ74vEfrRevaGkqdIk";
+//다음페이지
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { MainStackParamList } from "App";
+
+const BROWSER_KEY = (Constants.expoConfig?.extra as any)
+  ?.googleMapsKey as string;
 const BASE_URL = "http://localhost:8081";
 
 export default function MovingSpot() {
   const webRef = useRef<WebView>(null);
   const watcherRef = useRef<Location.LocationSubscription | null>(null);
-  const googleHtml = useMemo(() => makeGoogleHtml(BROWSER_KEY), []);
+  const googleHtml = useMemo(() => makeGoogleHtml(BROWSER_KEY), [BROWSER_KEY]);
 
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["4%", "20%", "35%"], []);
 
   const post = (msg: any) => webRef.current?.postMessage(JSON.stringify(msg));
+
+  //다음페이지
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   //로딩 상태/느림 표시
   const [loading, setLoading] = useState(true);
@@ -203,7 +213,10 @@ export default function MovingSpot() {
 
             <Pressable
               onPress={() => {
-                // TODO: AI 추천 경로 시작
+                //바텀 내려두고
+                sheetRef.current?.snapToIndex?.(0);
+                // Onboarding 화면으로 이동
+                navigation.navigate("Onboarding");
               }}
             >
               <Image
