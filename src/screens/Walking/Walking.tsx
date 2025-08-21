@@ -10,14 +10,12 @@ export default function Walking() {
   return (
     <ScrollView
       className="flex-1 bg-[#101010]"
-      contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}>
-      <View className="flex-1 px-3">
+      <View className="px-3">
         <Header title="Walking" />
         <WalkingTracker />
         <WalkingPoints />
       </View>
-
       <WalkingDetail />
     </ScrollView>
   );
