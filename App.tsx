@@ -103,9 +103,9 @@ const MyPageStack = createNativeStackNavigator<MyPageStackParamList>();
 function StartStackScreen() {
   return (
     <StartStack.Navigator screenOptions={{ headerShown: false }}>
+      <StartStack.Screen name="Login" component={Login} />
       <StartStack.Screen name="Map" component={Map} />
       <StartStack.Screen name="Splash" component={Splash} />
-      <StartStack.Screen name="Login" component={Login} />
       <StartStack.Screen name="Nickname" component={Nickname} />
       <StartStack.Screen name="Id" component={Id} />
       <StartStack.Screen name="Pw" component={Pw} />

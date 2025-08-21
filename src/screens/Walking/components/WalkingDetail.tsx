@@ -4,7 +4,7 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 export default function WalkingDetail() {
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["15%", "30%", "50%"], []);
+  const snapPoints = useMemo(() => ["7%", "50%"], []);
 
   return (
     <BottomSheet
@@ -21,23 +21,21 @@ export default function WalkingDetail() {
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
       }}
-      handleIndicatorStyle={{ backgroundColor: "#00000020" }}
-    >
+      handleIndicatorStyle={{ backgroundColor: "#00000020" }}>
       <BottomSheetScrollView
         contentContainerStyle={{
           paddingHorizontal: 32,
           paddingTop: 15,
           paddingBottom: 20,
         }}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <View className="justify-center">
           <View className="mb-5">
             <Text className="text-[#7C7C7C] font-bold text-base">거리</Text>
             <Text className="text-black text-[41px] font-bold">0km</Text>
           </View>
 
-          <View className="flex-row justify-between">
+          <View className="w-screen flex-row justify-between">
             <View className="flex-1">
               <Text className="text-gray-500 text-sm mb-1">페이스</Text>
               <Text className="text-orange-500 text-xl font-semibold">

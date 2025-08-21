@@ -60,7 +60,7 @@ export default function Nickname() {
             isChecked ? "bg-[#E9690D]" : "bg-[#222222]"
           }`}
           disabled={!isChecked}
-          onPress={() => navigation.navigate('Id')}
+          onPress={() => navigation.navigate('Id', { nickname })}
         >
           <Text
             className={`font-bold ${isChecked ? "text-white" : "text-[#A1A1A1]"}`}

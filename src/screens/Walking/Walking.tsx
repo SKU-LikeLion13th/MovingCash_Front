@@ -12,8 +12,7 @@ export default function Walking() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 120, // 바텀시트 최소 높이만큼 여백 확보
-        }}
-      >
+        }}>
         <View className="px-3">
           <Header title="Walking" />
           <WalkingTracker />
@@ -30,7 +29,7 @@ export default function Walking() {
           bottom: 0,
           zIndex: 100,
           // 하단에 여백 없이 완전히 고정
-          height: "100%", // 전체 높이 사용 가능하도록
+          height: "55%", // 전체 높이 사용 가능하도록
         }}
         pointerEvents="box-none" // 터치 이벤트가 바텀시트로만 전달되도록
       >

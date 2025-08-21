@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from "../../components/Header";
+import axios from "axios";
 
 export default function Pw() {
   const navigation = useNavigation();
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [isChecked, setIsChecked] = useState(false);
+  const route = useRoute();
+  const { nickname, id } = route.params as { nickname: string; id: string };
 
   // 두 비밀번호가 같을 때 isChecked true
   useEffect(() => {
@@ -17,6 +20,24 @@ export default function Pw() {
       setIsChecked(false);
     }
   }, [password, passwordConfirm]);
+
+  const handleSignup = async () => {
+    try {
+      const response = await axios.post("http://movingcash.sku-sku.com/auth/signup", {
+        name: nickname,
+        userId: id,
+        password: password,
+      });
+
+      if (response.status === 200) {
+        Alert.alert("회원가입 성공!", "로그인 화면으로 이동합니다.");
+        navigation.navigate("Login");
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("회원가입 실패", "다시 시도해주세요.");
+    }
+  };
 
   return (
     <View className="h-full bg-[#101010]">
@@ -66,7 +87,7 @@ export default function Pw() {
             isChecked ? "bg-[#E9690D]" : "bg-[#222222]"
           }`}
           disabled={!isChecked}
-          onPress={() => navigation.navigate("Start")} // 이동할 화면 지정
+          onPress={handleSignup}
         >
           <Text
             className={`font-bold ${isChecked ? "text-white" : "text-[#A1A1A1]"}`}

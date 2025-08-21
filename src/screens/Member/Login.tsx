@@ -1,21 +1,40 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
 import Header from "../../components/Header";
 import { Switch } from 'react-native-switch';
 import { useNavigation } from '@react-navigation/native';
+import axios from "axios";
 
 export default function Login() {
   const [isEnabled, setIsEnabled] = useState(false);
   const navigation = useNavigation();
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
 
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://movingcash.sku-sku.com/auth/login", {
+        userId: id,
+        password: password,
+      });
+
+      if (response.status === 200) {
+        Alert.alert("로그인 성공", "환영합니다!");
+        // 여기를 수정해줘!
+        navigation.navigate("MainTab", { screen: "Main" }); // 이 부분!
+      }
+    } catch (error: any) {
+      console.error("로그인 실패:", error);
+      Alert.alert("로그인 실패", "아이디/비밀번호를 확인해주세요.");
+    }
+  };
+  
   return (
     <View className="h-full bg-[#101010]">
       <Header title=" " />
       <View className="flex-1 pt-3 m-8">
-        <Text className="text-white text-[22px] font-bold mb-6">
-          로그인
-        </Text>
+        <Text className="text-white text-[22px] font-bold mb-6">로그인</Text>
 
         <View>
           <TextInput
@@ -23,6 +42,8 @@ export default function Login() {
             autoCapitalize="none"
             placeholder="아이디"
             placeholderTextColor="#B3B3B3"
+            value={id}
+            onChangeText={setId}
           />
 
           <TextInput
@@ -31,16 +52,15 @@ export default function Login() {
             placeholder="비밀번호"
             placeholderTextColor="#B3B3B3"
             secureTextEntry
+            value={password}
+            onChangeText={setPassword}
           />
 
           <View className="flex-row items-center justify-end mb-5">
-            <Text className="text-[#FFFFFF] text-[11px] mr-2">
-              로그인 상태유지
-            </Text>
+            <Text className="text-[#FFFFFF] text-[11px] mr-2">로그인 상태유지</Text>
             <Switch
               value={isEnabled}
               onValueChange={toggleSwitch}
-              disabled={false}
               activeText=""
               inActiveText=""
               circleSize={14}
@@ -51,10 +71,6 @@ export default function Login() {
               circleActiveColor="#FFFFFF"
               circleInActiveColor="#8A8A8A"
               changeValueImmediately={true}
-              innerCircleStyle={{
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
               renderActiveText={false}
               renderInActiveText={false}
               switchLeftPx={1.9}
@@ -64,7 +80,10 @@ export default function Login() {
             />
           </View>
 
-          <TouchableOpacity className="items-center py-4 bg-[#E9690D] rounded-md mb-10">
+          <TouchableOpacity 
+            className="items-center py-4 bg-[#E9690D] rounded-md mb-10"
+            onPress={handleLogin}
+          >
             <Text className="font-bold text-white">로그인</Text>
           </TouchableOpacity>
 
@@ -88,7 +107,7 @@ export default function Login() {
         </View>
 
         <View className="flex items-center mb-5">
-            <Text className="text-white text-[12px]">SNS 계정으로 로그인</Text>
+          <Text className="text-white text-[12px]">SNS 계정으로 로그인</Text>
         </View>
 
         <View className="flex flex-row justify-center">
