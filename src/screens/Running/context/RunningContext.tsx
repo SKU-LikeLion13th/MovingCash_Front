@@ -1,3 +1,4 @@
+//러닝 관련 실시간 데이터 전역 관리 (실시간 현재위치 위도 경도 추가 예정)
 import React, {
   createContext,
   useContext,
