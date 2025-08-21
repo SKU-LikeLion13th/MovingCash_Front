@@ -23,7 +23,7 @@ export default function WalkingMotivation({
 
   return (
     <View>
-      <Text className="text-center text-base text-white font-bold mt-4">
+      <Text className="text-center text-xl text-white font-notoBold mt-4">
         {message}
       </Text>
     </View>

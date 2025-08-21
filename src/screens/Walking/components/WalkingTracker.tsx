@@ -226,7 +226,9 @@ export default function WalkingTracker({
             strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute text-[43px] text-white font-bold">Start</Text>
+        <Text className="absolute text-5xl text-white font-poppinsSemiBold">
+          Start
+        </Text>
       </View>
     </>
   );
@@ -331,10 +333,12 @@ export default function WalkingTracker({
               );
             })}
           </Svg>
-          <Text className="absolute top-16 text-4xl text-white font-bold">
+          <Text className="absolute top-16 text-5xl text-white font-poppinsSemiBold">
             {steps.toLocaleString()}
           </Text>
-          <Text className="absolute bottom-11 text-sm text-white">steps</Text>
+          <Text className="absolute bottom-11 text-base text-white font-poppinsRegular">
+            steps
+          </Text>
         </View>
       </>
     );
@@ -356,10 +360,10 @@ export default function WalkingTracker({
             strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+        <Text className="absolute top-[65px] text-5xl text-white font-poppinsSemiBold">
           Stop
         </Text>
-        <Text className="absolute bottom-11 text-sm text-white">
+        <Text className="absolute bottom-11 text-base text-white font-poppinsRegular">
           {steps.toLocaleString()} steps
         </Text>
       </View>
@@ -382,10 +386,10 @@ export default function WalkingTracker({
             strokeDasharray={`${circumference * 0.5}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+        <Text className="absolute top-[65px] text-5xl text-white font-poppinsSemiBold">
           Finish!
         </Text>
-        <Text className="absolute bottom-11 text-sm text-[#E9690D]">
+        <Text className="absolute bottom-11 text-base text-[#E9690D] font-poppinsRegular">
           {steps.toLocaleString()} steps
         </Text>
       </View>
@@ -412,7 +416,7 @@ export default function WalkingTracker({
           <TouchableOpacity
             onPress={handleStart}
             className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
-            <Text className="text-white font-bold">시작하기</Text>
+            <Text className="text-white text-base font-notoBold">시작하기</Text>
           </TouchableOpacity>
         );
       case "ongoing":
@@ -421,12 +425,16 @@ export default function WalkingTracker({
             <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">종료하기</Text>
+              <Text className="text-white text-base font-notoBold">
+                종료하기
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handlePause}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">일시정지</Text>
+              <Text className="text-white text-base font-notoBold">
+                일시정지
+              </Text>
             </TouchableOpacity>
           </View>
         );
@@ -436,12 +444,16 @@ export default function WalkingTracker({
             <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">종료하기</Text>
+              <Text className="text-white text-base font-notoBold">
+                종료하기
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleResume}
               className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
-              <Text className="text-white font-bold">이어서 걷기</Text>
+              <Text className="text-white text-base font-notoBold">
+                이어서 걷기
+              </Text>
             </TouchableOpacity>
           </View>
         );

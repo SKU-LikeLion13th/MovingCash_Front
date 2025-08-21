@@ -6,6 +6,7 @@ import {
 } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useFonts } from "expo-font";
 import Main from "src/screens/Main/Main";
 import Walking from "src/screens/Walking/Walking";
 import Running from "src/screens/Running/Running";
@@ -163,14 +164,29 @@ function MyPageStackScreen() {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
+  //폰트 로딩
+  const [fontsLoaded] = useFonts({
+    NotoBold: require("./assets/fonts/NotoSansKR-Bold.ttf"),
+    NotoSemiBold: require("./assets/fonts/NotoSansKR-SemiBold.ttf"),
+    NotoMedium: require("./assets/fonts/NotoSansKR-Medium.ttf"),
+    NotoRegular: require("./assets/fonts/NotoSansKR-Regular.ttf"),
+
+    PoppinsBold: require("./assets/fonts/Poppins-Bold.ttf"),
+    PoppinsSemiBold: require("./assets/fonts/Poppins-SemiBold.ttf"),
+    PoppinsMedium: require("./assets/fonts/Poppins-Medium.ttf"),
+    PoppinsRegular: require("./assets/fonts/Poppins-Regular.ttf"),
+  });
+
+  //로딩 화면 (필요없으면 그냥 return null)
+  if (!fontsLoaded) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Tab.Navigator
           initialRouteName="MainTab"
           tabBar={(props) => <Bar {...props} />}
-          screenOptions={{ headerShown: false }}
-        >
+          screenOptions={{ headerShown: false }}>
           <Tab.Screen
             name="MainTab"
             component={MainStackScreen}

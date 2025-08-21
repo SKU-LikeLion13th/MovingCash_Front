@@ -32,7 +32,7 @@ export default function Walking() {
           left: 0,
           right: 0,
           bottom: 0,
-          height: "55%",
+          height: "100%",
         }}>
         <WalkingDetail elapsed={elapsed} formatted={formatted} />
       </View>

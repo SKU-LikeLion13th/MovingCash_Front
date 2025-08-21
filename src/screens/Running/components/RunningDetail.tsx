@@ -16,8 +16,10 @@ export default function RunningDetail() {
             />
           </View>
           <View>
-            <Text className="text-[#E9690D] text-xs">Calories</Text>
-            <Text className="text-white text-[22px] font-bold">
+            <Text className="text-[#E9690D] text-xs font-poppinsRegular">
+              Calories
+            </Text>
+            <Text className="text-white text-[22px] font-poppinsSemiBold">
               {calories} kcal
             </Text>
           </View>
@@ -31,8 +33,10 @@ export default function RunningDetail() {
             />
           </View>
           <View>
-            <Text className="text-[#E9690D] text-xs">Distance</Text>
-            <Text className="text-white text-[22px] font-bold">
+            <Text className="text-[#E9690D] text-xs font-poppinsRegular">
+              Distance
+            </Text>
+            <Text className="text-white text-[22px] font-poppinsSemiBold">
               {distance.toFixed(1)} km
             </Text>
           </View>
@@ -49,8 +53,10 @@ export default function RunningDetail() {
             />
           </View>
           <View>
-            <Text className="text-[#E9690D] text-xs">Pace</Text>
-            <Text className="text-white text-[22px] font-bold">
+            <Text className="text-[#E9690D] text-xs font-poppinsRegular">
+              Pace
+            </Text>
+            <Text className="text-white text-[22px] font-poppinsSemiBold">
               {pace.toFixed(1)} km/h
             </Text>
           </View>
@@ -65,8 +71,10 @@ export default function RunningDetail() {
             />
           </View>
           <View>
-            <Text className="text-[#E9690D] text-xs">Time</Text>
-            <Text className="text-white text-[22px] font-bold">
+            <Text className="text-[#E9690D] text-xs font-poppinsRegular">
+              Time
+            </Text>
+            <Text className="text-white text-[22px] font-poppinsSemiBold">
               {formatted}
             </Text>
           </View>

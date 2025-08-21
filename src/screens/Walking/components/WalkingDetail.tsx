@@ -10,7 +10,7 @@ export default function WalkingDetail({
   formatted: string;
 }) {
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["7%", "50%"], []);
+  const snapPoints = useMemo(() => ["4%", "30%"], []);
 
   const displayTime = (seconds: number) => {
     // const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -42,30 +42,40 @@ export default function WalkingDetail({
         }}>
         <View className="justify-center">
           {/* 거리 */}
-          <View className="mb-5">
-            <Text className="text-[#7C7C7C] font-bold text-base">거리</Text>
-            <Text className="text-black text-[41px] font-bold">0km</Text>
+          <View className="mb-7">
+            <Text className="text-[#7C7C7C] mb-2 font-notoBold text-base">
+              거리
+            </Text>
+            <Text className="text-black text-5xl font-poppinsSemiBold">
+              0km
+            </Text>
           </View>
 
           {/* 페이스 / 시간 / 칼로리 */}
           <View className="w-screen flex-row justify-between">
             <View className="flex-1">
-              <Text className="text-gray-500 text-sm mb-1">페이스</Text>
-              <Text className="text-orange-500 text-xl font-semibold">
+              <Text className="text-gray-500 text-sm mb-1.5 font-notoRegular">
+                페이스
+              </Text>
+              <Text className="text-orange-500 text-xl font-poppinsSemiBold">
                 0 km/h
               </Text>
             </View>
 
             <View className="flex-1">
-              <Text className="text-gray-500 text-sm mb-1">시간</Text>
-              <Text className="text-orange-500 text-xl font-semibold">
+              <Text className="text-gray-500 text-sm mb-1.5 font-notoRegular">
+                시간
+              </Text>
+              <Text className="text-orange-500 text-xl font-poppinsSemiBold">
                 {displayTime(elapsed)}
               </Text>
             </View>
 
             <View className="flex-1">
-              <Text className="text-gray-500 text-sm mb-1">칼로리</Text>
-              <Text className="text-orange-500 text-xl font-semibold">
+              <Text className="text-gray-500 text-sm mb-1.5 font-notoRegular">
+                칼로리
+              </Text>
+              <Text className="text-orange-500 text-xl font-poppinsSemiBold">
                 0 kcal
               </Text>
             </View>

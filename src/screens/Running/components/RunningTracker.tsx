@@ -41,7 +41,9 @@ export default function RunningTracker() {
             strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute text-[43px] text-white font-bold">Start</Text>
+        <Text className="absolute text-5xl text-white font-poppinsSemiBold">
+          Start
+        </Text>
       </View>
     </>
   );
@@ -151,7 +153,7 @@ export default function RunningTracker() {
               );
             })}
           </Svg>
-          <Text className="absolute text-[43px] text-white font-bold">
+          <Text className="absolute text-[43px] text-5xl text-white font-poppinsSemiBold">
             {distance.toFixed(1)} <Text className="text-4xl">km</Text>
           </Text>
         </View>
@@ -175,11 +177,11 @@ export default function RunningTracker() {
             strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+        <Text className="absolute top-[65px] text-5xl text-white font-poppinsSemiBold">
           Stop
         </Text>
-        <Text className="absolute bottom-11 text-sm text-white">
-          {distance.toFixed(1)}km
+        <Text className="absolute bottom-11 text-base text-white font-poppinsRegular">
+          {distance.toFixed(1)} km
         </Text>
       </View>
     </>
@@ -201,11 +203,11 @@ export default function RunningTracker() {
             strokeDasharray={`${circumference * 0.5}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+        <Text className="absolute top-[65px] text-5xl text-white font-poppinsSemiBold">
           Finish!
         </Text>
-        <Text className="absolute bottom-11 text-sm text-[#E9690D]">
-          {distance.toFixed(1)}km
+        <Text className="absolute bottom-11 text-base text-[#E9690D] font-poppinsRegular">
+          {distance.toFixed(1)} km
         </Text>
       </View>
     </>
@@ -234,7 +236,7 @@ export default function RunningTracker() {
           <TouchableOpacity
             onPress={handleStart}
             className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
-            <Text className="text-white font-bold">시작하기</Text>
+            <Text className="text-white text-base font-notoBold">시작하기</Text>
           </TouchableOpacity>
         );
       case "ongoing":
@@ -243,12 +245,16 @@ export default function RunningTracker() {
             <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">종료하기</Text>
+              <Text className="text-white text-base font-notoBold">
+                종료하기
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handlePause}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">일시정지</Text>
+              <Text className="text-white text-base font-notoBold">
+                일시정지
+              </Text>
             </TouchableOpacity>
           </View>
         );
@@ -258,12 +264,16 @@ export default function RunningTracker() {
             <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">종료하기</Text>
+              <Text className="text-white text-base font-notoBold">
+                종료하기
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleResume}
               className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
-              <Text className="text-white font-bold">이어달리기</Text>
+              <Text className="text-white text-base font-notoBold">
+                이어달리기
+              </Text>
             </TouchableOpacity>
           </View>
         );

@@ -4,14 +4,14 @@ import Svg, { Circle, Path } from "react-native-svg";
 
 export default function RunningPoints() {
   return (
-    <View className="my-10">
+    <View className="my-8">
       {/* 현재 보유 포인트 */}
       <View className="flex-row items-center justify-center">
-        <Text className="text-white font-bold text-[12px]">
+        <Text className="text-white font-notoSemiBold text-[13px]">
           현재 보유 포인트
         </Text>
 
-        <Svg width="15" height="15" viewBox="0 0 15 15" className="ml-3 mr-1.5">
+        <Svg width="13" height="13" viewBox="0 0 15 15" className="ml-3 mr-1.5">
           <Circle
             cx="7.35403"
             cy="7.816"
@@ -26,16 +26,16 @@ export default function RunningPoints() {
           />
         </Svg>
 
-        <Text className="text-white font-bold text-[12px]">32,100</Text>
+        <Text className="text-white font-notoSemiBold text-[13px]">32,100</Text>
       </View>
 
       {/* 오늘의 러닝 적립 포인트 */}
-      <View className="flex-row items-center justify-center mt-3.5">
-        <Text className="text-white font-bold text-[12px]">
+      <View className="flex-row items-center justify-center mt-1">
+        <Text className="text-white font-notoSemiBold text-[13px]">
           오늘의 러닝 적립 포인트
         </Text>
 
-        <Svg width="15" height="15" viewBox="0 0 15 15" className="ml-3 mr-1.5">
+        <Svg width="13" height="13" viewBox="0 0 15 15" className="ml-3 mr-1.5">
           <Circle
             cx="7.35403"
             cy="7.816"
@@ -50,7 +50,7 @@ export default function RunningPoints() {
           />
         </Svg>
 
-        <Text className="text-white font-bold text-[12px]">70</Text>
+        <Text className="text-white font-notoSemiBold text-[13px]">70</Text>
       </View>
     </View>
   );
