@@ -29,6 +29,7 @@ export default {
     },
     extra: {
       googleMapsKey: process.env.GOOGLE_MAPS_KEY,
+      tmapKey: process.env.TMAP_KEY,  
     },
   },
 };
