@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import Header from "../../components/Header";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function Id() {
   const [id, setId] = useState("");
   const navigation = useNavigation();
   const [isChecked, setIsChecked] = useState(false); // 중복확인 완료 여부
+  const route = useRoute();
+  const { nickname } = route.params as { nickname: string };
 
   return (
     <View className="h-full bg-[#101010]">
@@ -60,7 +62,7 @@ export default function Id() {
             isChecked ? "bg-[#E9690D]" : "bg-[#222222]"
           }`}
           disabled={!isChecked}
-          onPress={() => navigation.navigate('Pw')}
+          onPress={() => navigation.navigate('Pw', { nickname, id })}
         >
           <Text
             className={`font-bold ${isChecked ? "text-white" : "text-[#A1A1A1]"}`}
