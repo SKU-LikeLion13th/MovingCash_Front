@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Svg, {
   Circle,
   Defs,
@@ -6,13 +6,12 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-import React, { useState } from "react";
+import React from "react";
 import RunningMotivation from "./RunningMotivation";
-
-type StatusType = "start" | "ongoing" | "stop" | "finish";
+import { useRunning } from "../context/RunningContext";
 
 export default function RunningTracker() {
-  const [status, setStatus] = useState<StatusType>("start");
+  const { status, distance, setStatus } = useRunning();
 
   const size = 180;
   const strokeWidth = 9;
@@ -88,7 +87,7 @@ export default function RunningTracker() {
 
     const centerX: number = size / 2;
     const centerY: number = size / 2;
-    const totalDegrees: number = -270; // 75% 원
+    const totalDegrees: number = -270; // 시계 반대방향으로 채워지는 75% 원
     const segments: number = 60; // 그라데이션 세그먼트 수
     const degreesPerSegment: number = totalDegrees / segments;
 
@@ -153,7 +152,7 @@ export default function RunningTracker() {
             })}
           </Svg>
           <Text className="absolute text-[43px] text-white font-bold">
-            1.2 <Text className="text-4xl">km</Text>
+            {distance.toFixed(1)} <Text className="text-4xl">km</Text>
           </Text>
         </View>
       </>
@@ -179,7 +178,9 @@ export default function RunningTracker() {
         <Text className="absolute top-[52px] text-[43px] text-white font-bold">
           Stop
         </Text>
-        <Text className="absolute bottom-11 text-sm text-white">1.2km</Text>
+        <Text className="absolute bottom-11 text-sm text-white">
+          {distance.toFixed(1)}km
+        </Text>
       </View>
     </>
   );
@@ -203,7 +204,9 @@ export default function RunningTracker() {
         <Text className="absolute top-[52px] text-[43px] text-white font-bold">
           Finish!
         </Text>
-        <Text className="absolute bottom-11 text-sm text-[#E9690D]">1.2km</Text>
+        <Text className="absolute bottom-11 text-sm text-[#E9690D]">
+          {distance.toFixed(1)}km
+        </Text>
       </View>
     </>
   );
@@ -223,45 +226,45 @@ export default function RunningTracker() {
     }
   };
 
-  /** ----- 버튼 UI ----- */
+  /* 버튼 UI */
   const renderButtons = () => {
     switch (status) {
       case "start":
         return (
-          <Pressable
+          <TouchableOpacity
             onPress={handleStart}
             className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
             <Text className="text-white font-bold">시작하기</Text>
-          </Pressable>
+          </TouchableOpacity>
         );
       case "ongoing":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handlePause}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">일시정지</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       case "stop":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handleResume}
               className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
               <Text className="text-white font-bold">이어달리기</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       case "finish":

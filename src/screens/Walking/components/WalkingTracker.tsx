@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Animated } from "react-native";
+import { View, Text, TouchableOpacity, Animated } from "react-native";
 import Svg, {
   Circle,
   Defs,
@@ -14,7 +14,11 @@ type StatusType = "start" | "ongoing" | "stop" | "finish";
 
 const CALORIE_PER_STEP = 0.05;
 
-export default function WalkingTracker() {
+export default function WalkingTracker({
+  onTimeUpdate,
+}: {
+  onTimeUpdate?: (sec: number, hhmmss: string) => void;
+}) {
   const [status, setStatus] = useState<StatusType>("start");
   const [steps, setSteps] = useState(0);
 
@@ -32,6 +36,46 @@ export default function WalkingTracker() {
 
   const accelerationHistory = useRef<number[]>([]);
   const maxHistoryLength = 10;
+
+  const [elapsedTime, setElapsedTime] = useState(0); // 초 단위 저장
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /* 시간 포맷 변환 (HH:MM:SS) */
+  const formatTime = (seconds: number) => {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
+
+  /* 타이머 시작 */
+  const startTimer = () => {
+    if (intervalRef.current) return;
+    intervalRef.current = setInterval(() => {
+      setElapsedTime((prev) => prev + 1);
+    }, 1000);
+  };
+
+  /* 타이머 정지 */
+  const stopTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  /* 상태 변화에 따른 타이머 제어 */
+  useEffect(() => {
+    if (status === "ongoing") {
+      startTimer();
+    } else if (status === "stop" || status === "finish") {
+      stopTimer();
+    }
+  }, [status]);
+
+  useEffect(() => {
+    onTimeUpdate?.(elapsedTime, formatTime(elapsedTime));
+  }, [elapsedTime]);
 
   /* Accelerometer 사용*/
   useEffect(() => {
@@ -365,40 +409,40 @@ export default function WalkingTracker() {
     switch (status) {
       case "start":
         return (
-          <Pressable
+          <TouchableOpacity
             onPress={handleStart}
             className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
             <Text className="text-white font-bold">시작하기</Text>
-          </Pressable>
+          </TouchableOpacity>
         );
       case "ongoing":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handlePause}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">일시정지</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       case "stop":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
               <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handleResume}
               className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
               <Text className="text-white font-bold">이어서 걷기</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         );
       case "finish":
