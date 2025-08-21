@@ -1,23 +1,42 @@
-import React from "react";
-import { View, ScrollView } from "react-native";
-
 import Header from "src/components/Header";
 import WalkingTracker from "./components/WalkingTracker";
 import WalkingPoints from "./components/WalkingPoints";
 import WalkingDetail from "./components/WalkingDetail";
+import { View, ScrollView } from "react-native";
 
 export default function Walking() {
   return (
-    <ScrollView
-      className="flex-1 bg-[#101010]"
-      showsVerticalScrollIndicator={false}>
-      <View className="px-3">
-        <Header title="Walking" />
-        <WalkingTracker />
-        <WalkingPoints />
+    <View className="flex-1 bg-[#101010]">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 120, // 바텀시트 최소 높이만큼 여백 확보
+        }}
+      >
+        <View className="px-3">
+          <Header title="Walking" />
+          <WalkingTracker />
+          <WalkingPoints />
+        </View>
+      </ScrollView>
+
+      {/* 하단 고정 Bottom Sheet */}
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 100,
+          // 하단에 여백 없이 완전히 고정
+          height: "100%", // 전체 높이 사용 가능하도록
+        }}
+        pointerEvents="box-none" // 터치 이벤트가 바텀시트로만 전달되도록
+      >
+        <WalkingDetail />
       </View>
-      <WalkingDetail />
-    </ScrollView>
+    </View>
   );
 }
 
