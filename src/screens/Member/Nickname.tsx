@@ -1,12 +1,25 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Keyboard } from "react-native";
 import Header from "../../components/Header";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 export default function Nickname() {
   const [nickname, setNickname] = useState("");
   const navigation = useNavigation();
   const [isChecked, setIsChecked] = useState(false); // 중복확인 완료 여부
+
+  const handleCheck = () => {
+    if (nickname.trim()) {
+      setIsChecked(true);
+      Keyboard.dismiss(); // 키보드 닫기
+    }
+  };
+
+  const handleNext = () => {
+    if (isChecked) {
+      navigation.navigate("Id", { nickname });
+    }
+  };
 
   return (
     <View className="h-full bg-[#101010]">
@@ -18,13 +31,22 @@ export default function Nickname() {
           </Text>
 
           <View className="mx-1">
-            <Text className="text-[#FFFFFF] text-[12px] mb-3">닉네임  *</Text>
+            <Text className="text-[#FFFFFF] text-[12px] mb-3">닉네임 *</Text>
             <View className="flex flex-row items-center justify-between mb-2">
               <TextInput
                 value={nickname}
                 onChangeText={(text) => {
                   setNickname(text);
                   setIsChecked(false); // 입력 변경 시 중복확인 초기화
+                }}
+                autoCapitalize="none" // 첫 글자 자동 대문자 방지
+                returnKeyType={isChecked ? "next" : "done"} // 엔터 키 표시 변경
+                onSubmitEditing={() => {
+                  if (!isChecked) {
+                    handleCheck();
+                  } else {
+                    handleNext();
+                  }
                 }}
                 className={`flex w-[64%] px-3 py-2.5 bg-[#101010] text-[#FFFFFF] rounded-md ${
                   nickname ? "border border-[#FFFFFF]" : "border border-[#818181]"
@@ -35,7 +57,7 @@ export default function Nickname() {
                   nickname ? "bg-[#E9690D]" : "bg-[#B3B3B3]"
                 }`}
                 disabled={!nickname}
-                onPress={() => setIsChecked(true)}
+                onPress={handleCheck}
               >
                 <Text
                   className={`font-bold text-[11px] ${
@@ -60,7 +82,7 @@ export default function Nickname() {
             isChecked ? "bg-[#E9690D]" : "bg-[#222222]"
           }`}
           disabled={!isChecked}
-          onPress={() => navigation.navigate('Id', { nickname })}
+          onPress={handleNext}
         >
           <Text
             className={`font-bold ${isChecked ? "text-white" : "text-[#A1A1A1]"}`}
