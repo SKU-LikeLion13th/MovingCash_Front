@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import Header from "../../components/Header";
 import { Switch } from "react-native-switch";
@@ -19,8 +21,13 @@ export default function Login() {
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // 로그인 진행 여부
 
   const handleLogin = async () => {
+    if (loading) return; // 이미 진행 중이면 무시
+    setLoading(true);
+
+    Keyboard.dismiss();
     try {
       const response = await axios.post(
         "http://movingcash.sku-sku.com/auth/login",
@@ -29,137 +36,180 @@ export default function Login() {
           password: password,
         }
       );
-      console.log(response.data);
 
       if (response.status === 200) {
-        const data = response.data;
-        const token = data.token;
-        const tokenType = data.tokenType;
+        const { token, tokenType } = response.data;
 
         if (!token || !tokenType) {
           Alert.alert("로그인 실패", "토큰 정보를 받아오지 못했습니다.");
+          setLoading(false);
           return;
         }
 
-        await AsyncStorage.setItem(
-          "accessToken",
-          `${response.data.tokenType} ${response.data.token}`
-        );
+        await AsyncStorage.setItem("accessToken", `${tokenType} ${token}`);
         Alert.alert("로그인 성공", "환영합니다!");
-
         navigation.navigate("MainTab", { screen: "Main" });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("로그인 실패:", error);
       Alert.alert("로그인 실패", "아이디/비밀번호를 확인해주세요.");
+    } finally {
+      setLoading(false); // 무조건 해제
     }
   };
 
   return (
-    <View className="h-full bg-[#101010]">
+    <View style={{ flex: 1, backgroundColor: "#101010" }}>
       <Header title=" " />
-      <View className="flex-1 pt-3 m-8">
-        <Text className="text-white text-[22px] font-bold mb-6">로그인</Text>
+      <View style={{ flex: 1, paddingTop: 12, margin: 32 }}>
+        <Text
+          style={{
+            color: "white",
+            fontSize: 22,
+            fontWeight: "bold",
+            marginBottom: 24,
+          }}
+        >
+          로그인
+        </Text>
 
-        <View>
-          <TextInput
-            className="bg-[#FFFFFF] px-3 py-3.5 rounded-md mb-5"
-            autoCapitalize="none"
-            placeholder="아이디"
-            placeholderTextColor="#B3B3B3"
-            value={id}
-            onChangeText={setId}
+        {/* 아이디 입력 */}
+        <TextInput
+          style={{
+            backgroundColor: "#FFFFFF",
+            paddingHorizontal: 12,
+            paddingVertical: 14,
+            borderRadius: 6,
+            marginBottom: 20,
+          }}
+          autoCapitalize="none"
+          placeholder="아이디"
+          placeholderTextColor="#B3B3B3"
+          value={id}
+          onChangeText={setId}
+          returnKeyType="next"
+          onSubmitEditing={() => {
+            Keyboard.dismiss();
+          }}
+        />
+
+        {/* 비밀번호 입력 */}
+        <TextInput
+          style={{
+            backgroundColor: "#FFFFFF",
+            paddingHorizontal: 12,
+            paddingVertical: 14,
+            borderRadius: 6,
+            marginBottom: 20,
+          }}
+          autoCapitalize="none"
+          placeholder="비밀번호"
+          placeholderTextColor="#B3B3B3"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          returnKeyType="done"
+          onSubmitEditing={handleLogin}
+        />
+
+        {/* 로그인 상태 유지 */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            marginBottom: 20,
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 11, marginRight: 8 }}>
+            로그인 상태유지
+          </Text>
+          <Switch
+            value={isEnabled}
+            onValueChange={toggleSwitch}
+            activeText=""
+            inActiveText=""
+            circleSize={14}
+            barHeight={17}
+            circleBorderWidth={0}
+            backgroundActive="#E9690D"
+            backgroundInactive="#D9D9D9"
+            circleActiveColor="#FFFFFF"
+            circleInActiveColor="#8A8A8A"
+            changeValueImmediately={true}
+            renderActiveText={false}
+            renderInActiveText={false}
+            switchLeftPx={1.9}
+            switchRightPx={1.9}
+            switchWidthMultiplier={2.8}
+            switchBorderRadius={15}
           />
+        </View>
 
-          <TextInput
-            className="bg-[#FFFFFF] px-3 py-3.5 rounded-md mb-5"
-            autoCapitalize="none"
-            placeholder="비밀번호"
-            placeholderTextColor="#B3B3B3"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+        {/* 로그인 버튼 */}
+        <TouchableOpacity
+          style={{
+            alignItems: "center",
+            paddingVertical: 16,
+            backgroundColor: loading ? "#888888" : "#E9690D", // 로딩 시 회색
+            borderRadius: 6,
+            marginBottom: 40,
+          }}
+          onPress={handleLogin}
+          disabled={loading} // 로딩 중에는 비활성화
+        >
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={{ fontWeight: "bold", color: "white" }}>로그인</Text>
+          )}
+        </TouchableOpacity>
 
-          <View className="flex-row items-center justify-end mb-5">
-            <Text className="text-[#FFFFFF] text-[11px] mr-2">
-              로그인 상태유지
+        {/* 회원 관련 */}
+        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 40 }}>
+          <TouchableOpacity>
+            <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white" }}>
+              로그인
             </Text>
-            <Switch
-              value={isEnabled}
-              onValueChange={toggleSwitch}
-              activeText=""
-              inActiveText=""
-              circleSize={14}
-              barHeight={17}
-              circleBorderWidth={0}
-              backgroundActive="#E9690D"
-              backgroundInactive="#D9D9D9"
-              circleActiveColor="#FFFFFF"
-              circleInActiveColor="#8A8A8A"
-              changeValueImmediately={true}
-              renderActiveText={false}
-              renderInActiveText={false}
-              switchLeftPx={1.9}
-              switchRightPx={1.9}
-              switchWidthMultiplier={2.8}
-              switchBorderRadius={15}
-            />
-          </View>
-
-          <TouchableOpacity
-            className="items-center py-4 bg-[#E9690D] rounded-md mb-10"
-            onPress={handleLogin}
-          >
-            <Text className="font-bold text-white">로그인</Text>
           </TouchableOpacity>
-
-          <View className="flex flex-row items-center justify-center mb-20">
-            <TouchableOpacity className="items-center">
-              <Text className="font-medium text-[10.5px] text-white">
-                로그인
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="items-center">
-              <Text className="font-medium text-[10.5px] text-white mx-9">
-                비밀번호 찾기
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="items-center"
-              onPress={() => navigation.navigate("Nickname")}
-            >
-              <Text className="font-medium text-[10.5px] text-white">
-                회원가입
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-row items-center mb-14">
-            <View className="flex-1 h-[0.5px] bg-white" />
-            <Text className="mx-6 text-white text-[12px]">OR</Text>
-            <View className="flex-1 h-[0.5px] bg-white" />
-          </View>
+          <TouchableOpacity>
+            <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white", marginHorizontal: 36 }}>
+              비밀번호 찾기
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Nickname")}>
+            <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white" }}>
+              회원가입
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <View className="flex items-center mb-5">
-          <Text className="text-white text-[12px]">SNS 계정으로 로그인</Text>
+        {/* OR 구분선 */}
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 36 }}>
+          <View style={{ flex: 1, height: 0.5, backgroundColor: "white" }} />
+          <Text style={{ marginHorizontal: 24, color: "white", fontSize: 12 }}>OR</Text>
+          <View style={{ flex: 1, height: 0.5, backgroundColor: "white" }} />
         </View>
 
-        <View className="flex flex-row justify-center">
+        {/* SNS 로그인 */}
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <Text style={{ color: "white", fontSize: 12 }}>SNS 계정으로 로그인</Text>
+        </View>
+
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Image
             source={require("../../../assets/images/Social/kakao.png")}
-            className="w-11 h-11"
+            style={{ width: 44, height: 44 }}
             resizeMode="contain"
           />
           <Image
             source={require("../../../assets/images/Social/naver.png")}
-            className="mx-4 w-11 h-11"
+            style={{ width: 44, height: 44, marginHorizontal: 16 }}
             resizeMode="contain"
           />
           <Image
             source={require("../../../assets/images/Social/google.png")}
-            className="w-11 h-11"
+            style={{ width: 44, height: 44 }}
             resizeMode="contain"
           />
         </View>
