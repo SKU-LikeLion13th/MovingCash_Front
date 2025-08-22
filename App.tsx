@@ -69,9 +69,9 @@ export type MainStackParamList = {
   MovingSpot: undefined;
   Onboarding: undefined;
   MovingSpotResult: {
-    themes: string[];
-    difficulty: string[];
-    prefs: string[];
+    themes: { label: string; emoji?: string }[];
+    difficulty: { label: string; emoji?: string }[];
+    prefs: { label: string; emoji?: string }[];
   };
 };
 

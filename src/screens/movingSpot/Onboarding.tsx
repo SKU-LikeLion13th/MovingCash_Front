@@ -102,25 +102,24 @@ export default function Onboarding() {
     return true;
   }, [step, form]);
 
+  const pickWithEmoji = (labels: Set<string>, options: {label:string; emoji?:string}[]) =>
+  options.filter(o => labels.has(o.label)); 
+
   // 제출
   const handleSubmit = async () => {
-    // 로컬 payload(원하면 유지)
-    const payload = {
-      themes: Array.from(form.themes),
-      difficulty: Array.from(form.difficulty),
-      prefs: Array.from(form.prefs),
-    };
-
-    // TODO: 여기서 API에 모아서 전송
-    // await fetch(`${BASE_URL}/onboarding`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-
-    Alert.alert("설정 저장 완료", JSON.stringify(payload, null, 2));
-    navigation.navigate("MovingSpotResult", {
-      themes: Array.from(form.themes),
-      difficulty: Array.from(form.difficulty),
-      prefs: Array.from(form.prefs),
-    });
+  const payloadForApi = {
+    themes: Array.from(form.themes),
+    difficulty: Array.from(form.difficulty),
+    prefs: Array.from(form.prefs),
   };
+  // TODO: API 호출 시엔 payloadForApi 쓰면 됨
+  const params = {
+    themes: pickWithEmoji(form.themes, STEP1_OPTIONS),
+    difficulty: pickWithEmoji(form.difficulty, STEP2_OPTIONS),
+    prefs: pickWithEmoji(form.prefs, STEP3_OPTIONS),
+  };
+  navigation.navigate("MovingSpotResult", params);
+};
 
   return (
     <View className="flex-1 bg-[#101010] w-full">
