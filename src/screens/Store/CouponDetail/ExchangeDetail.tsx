@@ -1,35 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
 import Header from "src/components/Header";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StoreStackParamList } from "App";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<StoreStackParamList, "ExchangeDetail">;
 
 export default function ExchangeDetail({ route, navigation }: Props) {
   const { item } = route.params;
   const [agreed, setAgreed] = useState(false);
-  const [exchanged, setExchanged] = useState(false); // 교환 완료 상태
+  const [exchanged, setExchanged] = useState(false);
+  const [point, setPoint] = useState<number>(0);
 
-  // 포인트 계산
-  const ownedPoints = 32100;
+  // 필요 포인트
   const neededPoints = parseInt(item.points.replace(/,/g, ""));
-  const remainingPoints = ownedPoints - neededPoints;
+
+  // 교환 후 잔여 포인트 계산
+  const remainingPoints = point - neededPoints;
 
   const handleExchange = () => {
     if (remainingPoints < 0) {
       Alert.alert("포인트 부족", "보유 포인트가 부족합니다.");
       return;
     }
-    setExchanged(true); // 교환 완료 상태로 변경
+    setExchanged(true);
+    setPoint(remainingPoints); // ✅ 교환 후 즉시 반영
   };
+
+  useEffect(() => {
+    const fetchPoint = async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          console.warn("토큰이 없습니다. 로그인 필요!");
+          return;
+        }
+
+        const response = await fetch(
+          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "API 호출 실패:",
+            response.status,
+            await response.text()
+          );
+          return;
+        }
+
+        const data = await response.json();
+        setPoint(data.point);
+      } catch (error) {
+        console.error("API 호출 실패:", error);
+      }
+    };
+
+    fetchPoint();
+  }, []);
 
   return (
     <View className="h-full bg-[#101010]">
       <Header title="상점" showImage={true} />
       <View className="bg-white h-full rounded-t-3xl py-8 px-4">
-        {/* 상품 정보 + 포인트 */}
         <View className="space-y-8">
           {exchanged ? (
             <View className="items-center mt-8 space-y-4">
@@ -42,7 +84,6 @@ export default function ExchangeDetail({ route, navigation }: Props) {
               </Text>
               <View className="w-full h-[0.5px] bg-[#999999] my-4" />
 
-              {/* 교환 후 포인트 */}
               <View className="mt-4 space-y-2 w-full px-2">
                 <View className="flex-row justify-between">
                   <Text className="text-[#686868] text-[15px]">사용처</Text>
@@ -61,7 +102,7 @@ export default function ExchangeDetail({ route, navigation }: Props) {
                     잔여 포인트
                   </Text>
                   <Text className="text-[#101010] text-[15px] font-semibold">
-                    {remainingPoints.toLocaleString()}
+                    {point.toLocaleString()}
                   </Text>
                 </View>
               </View>
@@ -77,10 +118,10 @@ export default function ExchangeDetail({ route, navigation }: Props) {
                   className="w-[100px] h-[60px] rounded-lg"
                 />
                 <View className="ml-5 space-y-3">
-                  <Text className=" text-[10px] text-[#7b7b7b]">
+                  <Text className="text-[10px] text-[#7b7b7b]">
                     {item.name}
                   </Text>
-                  <Text className="text-[15px text-[#101010] font-semibold">
+                  <Text className="text-[15px] text-[#101010] font-semibold">
                     {item.product}
                   </Text>
                 </View>
@@ -90,14 +131,13 @@ export default function ExchangeDetail({ route, navigation }: Props) {
               </Text>
               <View className="w-full h-[0.5px] bg-[#999999]" />
 
-              {/* 기존 포인트 */}
               <View className="mt-8 space-y-3 px-2">
                 <View className="flex-row justify-between">
                   <Text className="text-[#686868] text-[15px]">
                     보유 포인트
                   </Text>
                   <Text className="text-[#101010] text-[15px] font-semibold">
-                    {ownedPoints.toLocaleString()}
+                    {point.toLocaleString()}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
@@ -121,7 +161,6 @@ export default function ExchangeDetail({ route, navigation }: Props) {
           )}
         </View>
 
-        {/* 약관 동의 */}
         {!exchanged && (
           <View className="flex-row self-center mt-20">
             <View className="flex-col items-center">
@@ -153,13 +192,12 @@ export default function ExchangeDetail({ route, navigation }: Props) {
           </View>
         )}
 
-        {/* 교환 버튼 */}
         <View className="flex-1 justify-end mb-24">
           <TouchableOpacity
             disabled={!agreed && !exchanged}
             onPress={() => {
               if (exchanged) {
-                navigation.navigate("UseCouponDetail", { coupon: item }); // ✅ 이동
+                navigation.navigate("UseCouponDetail", { coupon: item });
               } else {
                 handleExchange();
               }
