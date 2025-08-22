@@ -81,7 +81,7 @@ export default function WeeklyRunning() {
   }, []);
 
   return (
-    <View className="p-4">
+    <View className="">
       <View className="flex-row justify-between">
         {days.map((status, index) => {
           let bgColor = "";

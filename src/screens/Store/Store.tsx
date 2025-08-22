@@ -1,5 +1,4 @@
-// Store.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import Header from "src/components/Header";
 import Nearby, { NearbyBanner } from "./Nearby";
@@ -8,6 +7,7 @@ import Goods, { GoodsBanner } from "./Goods";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { StoreStackParamList } from "App";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Store() {
   const [activeTab, setActiveTab] = useState<"nearby" | "membership" | "goods">(
@@ -48,6 +48,47 @@ export default function Store() {
         return null;
     }
   };
+
+  const [point, setPoint] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchPoint = async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          console.warn("토큰이 없습니다. 로그인 필요!");
+          return;
+        }
+
+        const response = await fetch(
+          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "API 호출 실패:",
+            response.status,
+            await response.text()
+          );
+          return;
+        }
+
+        const data = await response.json();
+        setPoint(data.point);
+      } catch (error) {
+        console.error("API 호출 실패:", error);
+      }
+    };
+
+    fetchPoint();
+  }, []);
 
   return (
     <View className="h-full bg-[#101010]">
@@ -100,7 +141,7 @@ export default function Store() {
           source={require("../../../assets/images/store/point.png")}
           className="w-[14px] h-[14px]"
         />
-        <Text className="text-white">32,100</Text>
+        <Text className="text-white"> {point.toLocaleString()}</Text>
       </View>
 
       {/* 탭별 컨텐츠 */}

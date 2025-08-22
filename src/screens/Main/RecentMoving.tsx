@@ -1,29 +1,83 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+interface MovingData {
+  calories: number;
+  distance: number;
+}
 
 export default function RecentMoving() {
   const [mode, setMode] = useState<"Running" | "Walking">("Running");
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({ calories: 0, distance: 0 });
+  const [name, setName] = useState("User");
 
   useEffect(() => {
     const fetchData = async () => {
-      // 예시 데이터
-      const result = {
-        Running: { calories: 546, distance: 3.5 },
-        Walking: { calories: 320, distance: 2.1 },
-      };
-      setData(result[mode]);
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          console.warn("토큰이 없습니다. 로그인 필요!");
+          return;
+        }
+        const today = new Date();
+
+        const toLocalDateTimeString = (date: Date) => {
+          const y = date.getFullYear();
+          const m = String(date.getMonth() + 1).padStart(2, "0");
+          const d = String(date.getDate()).padStart(2, "0");
+          return `${y}-${m}-${d}T00:00:00`;
+        };
+        const todayStr = toLocalDateTimeString(today);
+
+        // 이번 주 월요일 ~ 일요일 구하기
+        const dayOfWeek = today.getDay(); // 0=일 ~ 6=토
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        const startDate = toLocalDateTimeString(monday);
+        const endDate = toLocalDateTimeString(sunday);
+
+        const response = await axios.post(
+          "http://movingcash.sku-sku.com/mainPage",
+          {
+            status: "RUNNING",
+            startDate,
+            endDate,
+            todayDate: todayStr,
+          },
+          {
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const resData = response.data;
+        setName(resData.name || "사용자");
+        setData({
+          calories: resData.totalCalories || 0,
+          distance: resData.totalDistance || 0,
+        });
+      } catch (error: any) {
+        console.error("API 호출 실패:", error.response || error.message);
+      }
     };
+
     fetchData();
-  }, [mode]);
+  }, []);
 
   return (
     <View className="relative">
       <View className="flex flex-row justify-between items-center mb-4">
         <Text className="text-white text-[15px] font-bold">
-          호연님의 최근 무빙
+          {name}님의 최근 무빙
         </Text>
 
         {/* 드롭다운 버튼 */}
