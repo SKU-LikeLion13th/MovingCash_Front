@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Animated } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Svg, {
   Circle,
   Defs,
@@ -6,199 +6,58 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-import React, { useState, useEffect, useRef } from "react";
-import { Accelerometer } from "expo-sensors";
+import React from "react";
 import WalkingMotivation from "./WalkingMotivation";
+import { useWalking } from "../context/WalkingContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type StatusType = "start" | "ongoing" | "stop" | "finish";
-
-const CALORIE_PER_STEP = 0.05;
-
-export default function WalkingTracker({
-  onTimeUpdate,
-}: {
-  onTimeUpdate?: (sec: number, hhmmss: string) => void;
-}) {
-  const [status, setStatus] = useState<StatusType>("start");
-  const [steps, setSteps] = useState(0);
-
-  /* 걸음수 감지 관련 Ref */
-  const lastAccel = useRef({ x: 0, y: 0, z: 0 });
-  const lastPeak = useRef({ x: 0, y: 0, z: 0 });
-  const wasIncreasing = useRef({ x: false, y: false, z: false });
-  const threshold = useRef(0.2);
-  const minPeakDifference = useRef(0.3);
-
-  const lastStepTime = useRef(0);
-  const minStepInterval = useRef(350);
-  const maxStepsPerSecond = useRef(4);
-  const recentSteps = useRef<number[]>([]);
-
-  const accelerationHistory = useRef<number[]>([]);
-  const maxHistoryLength = 10;
-
-  const [elapsedTime, setElapsedTime] = useState(0); // 초 단위 저장
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  /* 시간 포맷 변환 (HH:MM:SS) */
-  const formatTime = (seconds: number) => {
-    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
-    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-    const s = String(seconds % 60).padStart(2, "0");
-    return `${h}:${m}:${s}`;
-  };
-
-  /* 타이머 시작 */
-  const startTimer = () => {
-    if (intervalRef.current) return;
-    intervalRef.current = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
-    }, 1000);
-  };
-
-  /* 타이머 정지 */
-  const stopTimer = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
-
-  /* 상태 변화에 따른 타이머 제어 */
-  useEffect(() => {
-    if (status === "ongoing") {
-      startTimer();
-    } else if (status === "stop" || status === "finish") {
-      stopTimer();
-    }
-  }, [status]);
-
-  useEffect(() => {
-    onTimeUpdate?.(elapsedTime, formatTime(elapsedTime));
-  }, [elapsedTime]);
-
-  /* Accelerometer 사용*/
-  useEffect(() => {
-    let subscription: any;
-
-    if (status === "ongoing") {
-      Accelerometer.setUpdateInterval(50);
-      subscription = Accelerometer.addListener((data) => {
-        const { x, y, z } = data;
-        const currentTime = Date.now();
-
-        const totalAcceleration = Math.sqrt(x * x + y * y + z * z);
-        accelerationHistory.current.push(totalAcceleration);
-        if (accelerationHistory.current.length > maxHistoryLength) {
-          accelerationHistory.current.shift();
-        }
-
-        if (!isShockDetected()) {
-          detectStepWithTimeLimit(x, y, z, currentTime);
-        }
-      });
-    }
-
-    return () => {
-      if (subscription) subscription.remove();
-    };
-  }, [status]);
-
-  /* 충격 감지 */
-  const isShockDetected = () => {
-    if (accelerationHistory.current.length < 5) return false;
-    const recent = accelerationHistory.current.slice(-5);
-    const average = recent.reduce((sum, val) => sum + val, 0) / recent.length;
-    const current = recent[recent.length - 1];
-    return current > average * 2 && current > 12;
-  };
-
-  /* 걸음 감지 */
-  const detectStepWithTimeLimit = (
-    x: number,
-    y: number,
-    z: number,
-    currentTime: number
-  ) => {
-    const currentAccel = { x, y, z };
-    const prevAccel = lastAccel.current;
-
-    if (prevAccel.x === 0 && prevAccel.y === 0 && prevAccel.z === 0) {
-      lastAccel.current = { ...currentAccel };
-      lastPeak.current = { ...currentAccel };
-      return;
-    }
-
-    const timeSinceLastStep = currentTime - lastStepTime.current;
-    if (timeSinceLastStep < minStepInterval.current) {
-      lastAccel.current = { ...currentAccel };
-      return;
-    }
-
-    recentSteps.current = recentSteps.current.filter(
-      (timestamp) => currentTime - timestamp < 1000
-    );
-    if (recentSteps.current.length >= maxStepsPerSecond.current) {
-      lastAccel.current = { ...currentAccel };
-      return;
-    }
-
-    let stepDetected = false;
-
-    ["x", "y", "z"].forEach((axis) => {
-      const current = currentAccel[axis as "x" | "y" | "z"];
-      const prev = prevAccel[axis as "x" | "y" | "z"];
-      const lastPeakValue = lastPeak.current[axis as "x" | "y" | "z"];
-
-      const difference = current - prev;
-      const isIncreasing = difference > threshold.current;
-      const isDecreasing = difference < -threshold.current;
-      const wasGoingUp = wasIncreasing.current[axis as "x" | "y" | "z"];
-
-      if (wasGoingUp && isDecreasing) {
-        const peakDifference = Math.abs(prev - lastPeakValue);
-        if (peakDifference > minPeakDifference.current) {
-          stepDetected = true;
-          lastPeak.current[axis as "x" | "y" | "z"] = prev;
-        }
-      } else if (!wasGoingUp && isIncreasing) {
-        const valleyDifference = Math.abs(prev - lastPeakValue);
-        if (valleyDifference > minPeakDifference.current) {
-          stepDetected = true;
-          lastPeak.current[axis as "x" | "y" | "z"] = prev;
-        }
-      }
-
-      if (isIncreasing || isDecreasing) {
-        wasIncreasing.current[axis as "x" | "y" | "z"] = isIncreasing;
-      }
-    });
-
-    if (stepDetected) {
-      setSteps((prev) => prev + 1);
-      lastStepTime.current = currentTime;
-      recentSteps.current.push(currentTime);
-    }
-
-    lastAccel.current = { ...currentAccel };
-  };
-
-  /* 걸음수 리셋 */
-  const resetSteps = () => {
-    setSteps(0);
-    lastAccel.current = { x: 0, y: 0, z: 0 };
-    lastPeak.current = { x: 0, y: 0, z: 0 };
-    wasIncreasing.current = { x: false, y: false, z: false };
-    lastStepTime.current = 0;
-    recentSteps.current = [];
-    accelerationHistory.current = [];
-  };
+export default function WalkingTracker() {
+  const { status, steps, setStatus } = useWalking();
 
   /* 상태 전환 핸들러 */
   const handleStart = () => {
-    // resetSteps();
-    setStatus("ongoing");
+    const requestStart = async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          console.warn("토큰이 없습니다. 로그인 필요!");
+          return;
+        }
+
+        const response = await fetch(
+          "http://movingcash.sku-sku.com/sessions/start",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: "WALKING",
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "API 호출 실패:",
+            response.status,
+            await response.text()
+          );
+          return;
+        }
+
+        const data = await response.json();
+
+        setStatus("ongoing");
+      } catch (error) {
+        console.error("API 호출 실패:", error);
+      }
+    };
+
+    requestStart();
   };
+
   const handlePause = () => setStatus("stop");
   const handleResume = () => setStatus("ongoing");
   const handleFinish = () => setStatus("finish");
