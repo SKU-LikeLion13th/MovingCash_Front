@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import Header from "src/components/Header";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MainStackParamList } from "App";
 
 export default function PointMain() {
-  // 2. useNavigation에 타입 적용
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const [point, setPoint] = useState<number>(0);
 
   const missions = [
     {
@@ -16,7 +17,7 @@ export default function PointMain() {
       textBig: "100원 받기",
       time: "09:22:24",
       image: require("../../../assets/images/sneakers.png"),
-      imageWidth: 160, // px 단위
+      imageWidth: 160,
       imageHeight: 80,
       btnText: "포인트 받기",
       btnBg: "#E9690D",
@@ -35,6 +36,45 @@ export default function PointMain() {
     },
   ];
 
+  useEffect(() => {
+    const fetchPoint = async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          console.warn("토큰이 없습니다. 로그인 필요!");
+          return;
+        }
+
+        const response = await fetch(
+          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "API 호출 실패:",
+            response.status,
+            await response.text()
+          );
+          return;
+        }
+
+        const data = await response.json();
+        setPoint(data.point);
+      } catch (error) {
+        console.error("API 호출 실패:", error);
+      }
+    };
+
+    fetchPoint();
+  }, []);
+
   return (
     <View className="h-full bg-[#101010]">
       <Header title="포인트" />
@@ -46,7 +86,7 @@ export default function PointMain() {
           </Text>
           <View className="flex flex-row items-center my-4">
             <Text className="text-white text-[30px] mr-2 font-black">
-              32,100 P
+              {point.toLocaleString()} P
             </Text>
             <MaterialIcons
               name="keyboard-arrow-right"
