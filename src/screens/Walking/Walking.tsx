@@ -1,393 +1,175 @@
-import React from "react";
-import { View, ScrollView } from "react-native";
-
 import Header from "src/components/Header";
 import WalkingTracker from "./components/WalkingTracker";
 import WalkingPoints from "./components/WalkingPoints";
 import WalkingDetail from "./components/WalkingDetail";
+import { View, ScrollView } from "react-native";
+import { useState } from "react";
 
 export default function Walking() {
-  return (
-    <ScrollView
-      className="flex-1 bg-[#101010]"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}>
-      <View className="flex-1 px-3">
-        <Header title="Walking" />
-        <WalkingTracker />
-        <WalkingPoints />
-      </View>
+  const [elapsed, setElapsed] = useState(0);
+  const [formatted, setFormatted] = useState("00:00:00");
 
-      <WalkingDetail />
-    </ScrollView>
+  return (
+    <View className="flex-1 bg-[#101010]">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="px-3">
+          <Header title="Walking" />
+          {/* WalkingTracker에서 시간 받아오기 */}
+          <WalkingTracker
+            onTimeUpdate={(sec, hhmmss) => {
+              setElapsed(sec);
+              setFormatted(hhmmss);
+            }}
+          />
+          <WalkingPoints />
+        </View>
+      </ScrollView>
+
+      {/* 하단 BottomSheet */}
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: "100%",
+        }}>
+        <WalkingDetail elapsed={elapsed} formatted={formatted} />
+      </View>
+    </View>
   );
 }
 
-// import React, { useState, useEffect, useRef } from "react";
-// import { Text, View } from "react-native";
-// import { Accelerometer } from "expo-sensors";
+// import React, { useEffect, useRef, useState } from "react";
+// import { View, Text, Button, Alert } from "react-native";
+// import * as Location from "expo-location";
 
-// const CALORIE_PER_STEP = 0.05;
+// export default function LocationSender() {
+//   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+//     null
+//   );
+//   const [isRunning, setIsRunning] = useState(false); // 실행 상태
+//   const [duration, setDuration] = useState(0); // 초 단위 저장
+//   const [pointIndex, setPointIndex] = useState(1);
 
-// export default function Walking() {
-//   const [steps, setSteps] = useState(0);
-//   const [isDebugMode, setIsDebugMode] = useState(false);
-//   const [debugInfo, setDebugInfo] = useState("");
+//   const wsRef = useRef<WebSocket | null>(null);
+//   const watchRef = useRef<any>(null);
+//   const timerRef = useRef<any>(null);
 
-//   // 각 축별로 이전 값과 피크 추적
-//   const lastAccel = useRef({ x: 0, y: 0, z: 0 });
-//   const lastPeak = useRef({ x: 0, y: 0, z: 0 });
-//   const wasIncreasing = useRef({ x: false, y: false, z: false });
-//   const threshold = useRef(0.2);
-//   const minPeakDifference = useRef(0.3);
-
-//   // 충격 방지를 위한 시간 제한
-//   const lastStepTime = useRef(0);
-//   const minStepInterval = useRef(300); // 최소 걸음 간격 (300ms)
-//   const maxStepsPerSecond = useRef(4); // 초당 최대 걸음 수
-//   const recentSteps = useRef([]); // 최근 걸음들의 타임스탬프
-
-//   // 충격 감지를 위한 변수들
-//   const accelerationHistory = useRef([]);
-//   const maxHistoryLength = 10;
-
-//   useEffect(() => {
-//     let subscription;
-
-//     Accelerometer.isAvailableAsync().then((result) => {
-//       if (result) {
-//         Accelerometer.setUpdateInterval(50);
-
-//         subscription = Accelerometer.addListener((data) => {
-//           const { x, y, z } = data;
-//           const currentTime = Date.now();
-
-//           // 전체 가속도 크기 계산 (충격 감지용)
-//           const totalAcceleration = Math.sqrt(x * x + y * y + z * z);
-
-//           // 가속도 히스토리 업데이트
-//           accelerationHistory.current.push(totalAcceleration);
-//           if (accelerationHistory.current.length > maxHistoryLength) {
-//             accelerationHistory.current.shift();
-//           }
-
-//           // 충격 감지
-//           if (isShockDetected()) {
-//             if (isDebugMode) {
-//               setDebugInfo("⚠️ 충격 감지 - 걸음 카운트 무시");
-//             }
-//             return; // 충격이면 걸음 감지 하지 않음
-//           }
-
-//           detectStepWithTimeLimit(x, y, z, currentTime);
-
-//           if (isDebugMode) {
-//             const timeSinceLastStep = currentTime - lastStepTime.current;
-//             setDebugInfo(
-//               `X: ${x.toFixed(2)} ${getMovementSymbol("x", x)} | ` +
-//                 `Y: ${y.toFixed(2)} ${getMovementSymbol("y", y)} | ` +
-//                 `Z: ${z.toFixed(2)} ${getMovementSymbol("z", z)} | ` +
-//                 `마지막걸음: ${timeSinceLastStep}ms`
-//             );
-//           }
-//         });
-//       }
-//     });
-
-//     return () => {
-//       if (subscription) {
-//         subscription.remove();
-//       }
-//     };
-//   }, [isDebugMode]);
-
-//   // 충격 감지 함수
-//   const isShockDetected = () => {
-//     if (accelerationHistory.current.length < 5) return false;
-
-//     const recent = accelerationHistory.current.slice(-5);
-//     const average = recent.reduce((sum, val) => sum + val, 0) / recent.length;
-//     const current = recent[recent.length - 1];
-
-//     // 갑작스러운 큰 변화 감지 (평균의 2배 이상)
-//     const isShock = current > average * 2 && current > 12; // 12는 중력가속도 + 충격
-
-//     return isShock;
+//   // 📌 경과 시간 -> HH:MM:SS 포맷 변환
+//   const formatDuration = (seconds: number) => {
+//     const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+//     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+//     const s = String(seconds % 60).padStart(2, "0");
+//     return `${h}:${m}:${s}`;
 //   };
 
-//   const getMovementSymbol = (axis, currentValue) => {
-//     const prev = lastAccel.current[axis];
-//     const diff = currentValue - prev;
-
-//     if (Math.abs(diff) < threshold.current) return "-";
-//     return diff > 0 ? "↗" : "↘";
-//   };
-
-//   const detectStepWithTimeLimit = (x, y, z, currentTime) => {
-//     const currentAccel = { x, y, z };
-//     const prevAccel = lastAccel.current;
-
-//     // 첫 번째 측정이면 초기화
-//     if (prevAccel.x === 0 && prevAccel.y === 0 && prevAccel.z === 0) {
-//       lastAccel.current = { ...currentAccel };
-//       lastPeak.current = { ...currentAccel };
+//   // 📌 위치 권한 요청 + WebSocket 연결
+//   const startTracking = async () => {
+//     let { status } = await Location.requestForegroundPermissionsAsync();
+//     if (status !== "granted") {
+//       Alert.alert(
+//         "위치 권한 필요",
+//         "현재 위치를 확인하려면 위치 접근 권한을 허용해주세요."
+//       );
 //       return;
 //     }
 
-//     // 시간 제한 체크
-//     const timeSinceLastStep = currentTime - lastStepTime.current;
-//     if (timeSinceLastStep < minStepInterval.current) {
-//       lastAccel.current = { ...currentAccel };
-//       return; // 너무 짧은 간격이면 무시
-//     }
+//     // WebSocket 연결 (URL은 실제 서버 주소로 변경)
+//     wsRef.current = new WebSocket("wss://your-server.com/ws");
 
-//     // 최근 1초간 걸음 수 체크
-//     recentSteps.current = recentSteps.current.filter(
-//       (timestamp) => currentTime - timestamp < 1000
+//     wsRef.current.onopen = () => {
+//       console.log("✅ WebSocket 연결됨");
+//     };
+
+//     wsRef.current.onmessage = (msg) => {
+//       console.log("📩 서버 응답:", msg.data);
+//     };
+
+//     wsRef.current.onerror = (err) => {
+//       console.error("❌ WebSocket 오류:", err);
+//     };
+
+//     wsRef.current.onclose = () => {
+//       console.log("🔌 WebSocket 연결 종료");
+//     };
+
+//     // 실시간 위치 추적
+//     watchRef.current = await Location.watchPositionAsync(
+//       {
+//         accuracy: Location.Accuracy.High,
+//         timeInterval: 3000, // 3초마다
+//         distanceInterval: 1,
+//       },
+//       (pos) => {
+//         const { latitude, longitude } = pos.coords;
+//         setLocation({ lat: latitude, lng: longitude });
+
+//         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+//           const payload = {
+//             lat: latitude,
+//             lng: longitude,
+//             timestamp: new Date().toISOString(),
+//             pointIndex: pointIndex,
+//             step: 50, // running이어도 전송 필요
+//             duration: formatDuration(duration),
+//           };
+//           wsRef.current.send(JSON.stringify(payload));
+//           console.log("📤 위치 전송:", payload);
+
+//           setPointIndex((prev) => prev + 1);
+//         }
+//       }
 //     );
 
-//     if (recentSteps.current.length >= maxStepsPerSecond.current) {
-//       lastAccel.current = { ...currentAccel };
-//       return; // 초당 최대 걸음 수 초과시 무시
+//     // 타이머 시작 (duration 증가)
+//     timerRef.current = setInterval(() => {
+//       setDuration((prev) => prev + 1);
+//     }, 1000);
+
+//     setIsRunning(true);
+//   };
+
+//   // 📌 일시정지
+//   const pauseTracking = () => {
+//     if (watchRef.current) {
+//       watchRef.current.remove();
+//       watchRef.current = null;
 //     }
-
-//     let stepDetected = false;
-
-//     // 각 축별로 피크와 골 감지
-//     ["x", "y", "z"].forEach((axis) => {
-//       const current = currentAccel[axis];
-//       const prev = prevAccel[axis];
-//       const lastPeakValue = lastPeak.current[axis];
-
-//       const difference = current - prev;
-//       const isIncreasing = difference > threshold.current;
-//       const isDecreasing = difference < -threshold.current;
-//       const wasGoingUp = wasIncreasing.current[axis];
-
-//       // 방향 전환 감지 (피크 또는 골 감지)
-//       if (wasGoingUp && isDecreasing) {
-//         // 피크 감지
-//         const peakDifference = Math.abs(prev - lastPeakValue);
-//         if (peakDifference > minPeakDifference.current) {
-//           stepDetected = true;
-//           lastPeak.current[axis] = prev;
-//         }
-//       } else if (!wasGoingUp && isIncreasing) {
-//         // 골 감지
-//         const valleyDifference = Math.abs(prev - lastPeakValue);
-//         if (valleyDifference > minPeakDifference.current) {
-//           stepDetected = true;
-//           lastPeak.current[axis] = prev;
-//         }
-//       }
-
-//       // 현재 방향 저장
-//       if (isIncreasing || isDecreasing) {
-//         wasIncreasing.current[axis] = isIncreasing;
-//       }
-//     });
-
-//     // 걸음이 감지되고 시간 조건을 만족하면 카운트
-//     if (stepDetected) {
-//       setSteps((prev) => prev + 1);
-//       lastStepTime.current = currentTime;
-//       recentSteps.current.push(currentTime);
+//     if (timerRef.current) {
+//       clearInterval(timerRef.current);
+//       timerRef.current = null;
 //     }
-
-//     lastAccel.current = { ...currentAccel };
+//     setIsRunning(false);
+//     console.log("⏸️ 위치 전송 일시정지");
 //   };
 
-//   const resetSteps = () => {
-//     setSteps(0);
-//     lastAccel.current = { x: 0, y: 0, z: 0 };
-//     lastPeak.current = { x: 0, y: 0, z: 0 };
-//     wasIncreasing.current = { x: false, y: false, z: false };
-//     lastStepTime.current = 0;
-//     recentSteps.current = [];
-//     accelerationHistory.current = [];
+//   // 📌 종료
+//   const stopTracking = () => {
+//     pauseTracking();
+//     if (wsRef.current) {
+//       wsRef.current.close();
+//       wsRef.current = null;
+//     }
+//     setDuration(0);
+//     setPointIndex(1);
+//     console.log("🛑 위치 전송 종료");
 //   };
-
-//   const toggleDebugMode = () => {
-//     setIsDebugMode(!isDebugMode);
-//   };
-
-//   // 민감도 조정
-//   const increaseThreshold = () => {
-//     threshold.current = Math.min(0.5, threshold.current + 0.05);
-//     minPeakDifference.current = Math.min(1.0, minPeakDifference.current + 0.1);
-//   };
-
-//   const decreaseThreshold = () => {
-//     threshold.current = Math.max(0.05, threshold.current - 0.05);
-//     minPeakDifference.current = Math.max(0.1, minPeakDifference.current - 0.1);
-//   };
-
-//   // 시간 제한 조정
-//   const increaseTimeLimit = () => {
-//     minStepInterval.current = Math.min(500, minStepInterval.current + 50);
-//     maxStepsPerSecond.current = Math.max(2, maxStepsPerSecond.current - 1);
-//   };
-
-//   const decreaseTimeLimit = () => {
-//     minStepInterval.current = Math.max(100, minStepInterval.current - 50);
-//     maxStepsPerSecond.current = Math.min(6, maxStepsPerSecond.current + 1);
-//   };
-
-//   const estimatedCaloriesBurned = (steps * CALORIE_PER_STEP).toFixed(2);
 
 //   return (
-//     <View
-//       style={{
-//         flex: 1,
-//         justifyContent: "center",
-//         alignItems: "center",
-//         padding: 20,
-//       }}>
-//       <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
-//         Step Tracker
+//     <View className="flex-1 justify-center items-center">
+//       <Text className="mb-4">
+//         {location
+//           ? `📍 현재 위치: ${location.lat}, ${location.lng}`
+//           : "위치 불러오는 중..."}
 //       </Text>
-
-//       <View style={{ alignItems: "center", marginBottom: 30 }}>
-//         <Text style={{ fontSize: 48, fontWeight: "bold", color: "#007AFF" }}>
-//           {steps}
-//         </Text>
-//         <Text style={{ fontSize: 18, color: "gray" }}>걸음</Text>
-//       </View>
-
-//       <View style={{ alignItems: "center", marginBottom: 30 }}>
-//         <Text style={{ fontSize: 24, fontWeight: "bold", color: "#FF6B35" }}>
-//           {estimatedCaloriesBurned}
-//         </Text>
-//         <Text style={{ fontSize: 16, color: "gray" }}>칼로리</Text>
-//       </View>
-
-//       {isDebugMode && (
-//         <View
-//           style={{
-//             backgroundColor: "#f0f0f0",
-//             padding: 15,
-//             marginBottom: 20,
-//             borderRadius: 8,
-//             width: "100%",
-//           }}>
-//           <Text
-//             style={{
-//               fontSize: 11,
-//               fontFamily: "monospace",
-//               textAlign: "center",
-//               lineHeight: 16,
-//             }}>
-//             {debugInfo}
-//           </Text>
-//           <View style={{ marginTop: 10, alignItems: "center" }}>
-//             <Text style={{ fontSize: 10, color: "gray" }}>
-//               걸음간격: {minStepInterval.current}ms | 초당최대:{" "}
-//               {maxStepsPerSecond.current}걸음 | 민감도:{" "}
-//               {threshold.current.toFixed(2)}
-//             </Text>
-//           </View>
-//         </View>
+//       <Text className="mb-4">⏱ 경과 시간: {formatDuration(duration)}</Text>
+//       {!isRunning ? (
+//         <Button title="▶️ 시작" onPress={startTracking} />
+//       ) : (
+//         <Button title="⏸ 일시정지" onPress={pauseTracking} />
 //       )}
-
-//       <View style={{ flexDirection: "row", gap: 10, marginBottom: 15 }}>
-//         <View
-//           style={{
-//             backgroundColor: "#007AFF",
-//             paddingHorizontal: 20,
-//             paddingVertical: 12,
-//             borderRadius: 8,
-//           }}>
-//           <Text
-//             style={{ color: "white", fontSize: 16, fontWeight: "bold" }}
-//             onPress={resetSteps}>
-//             초기화
-//           </Text>
-//         </View>
-
-//         <View
-//           style={{
-//             backgroundColor: isDebugMode ? "#FF6B35" : "#888",
-//             paddingHorizontal: 20,
-//             paddingVertical: 12,
-//             borderRadius: 8,
-//           }}>
-//           <Text
-//             style={{ color: "white", fontSize: 16, fontWeight: "bold" }}
-//             onPress={toggleDebugMode}>
-//             {isDebugMode ? "디버그 OFF" : "디버그 ON"}
-//           </Text>
-//         </View>
-//       </View>
-
-//       {isDebugMode && (
-//         <View>
-//           <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
-//             <View
-//               style={{
-//                 backgroundColor: "#28a745",
-//                 paddingHorizontal: 15,
-//                 paddingVertical: 10,
-//                 borderRadius: 8,
-//               }}>
-//               <Text
-//                 style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
-//                 onPress={decreaseThreshold}>
-//                 민감도 ↑
-//               </Text>
-//             </View>
-
-//             <View
-//               style={{
-//                 backgroundColor: "#dc3545",
-//                 paddingHorizontal: 15,
-//                 paddingVertical: 10,
-//                 borderRadius: 8,
-//               }}>
-//               <Text
-//                 style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
-//                 onPress={increaseThreshold}>
-//                 민감도 ↓
-//               </Text>
-//             </View>
-//           </View>
-
-//           <View style={{ flexDirection: "row", gap: 10 }}>
-//             <View
-//               style={{
-//                 backgroundColor: "#6f42c1",
-//                 paddingHorizontal: 15,
-//                 paddingVertical: 10,
-//                 borderRadius: 8,
-//               }}>
-//               <Text
-//                 style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
-//                 onPress={decreaseTimeLimit}>
-//                 빠른걸음 ↑
-//               </Text>
-//             </View>
-
-//             <View
-//               style={{
-//                 backgroundColor: "#fd7e14",
-//                 paddingHorizontal: 15,
-//                 paddingVertical: 10,
-//                 borderRadius: 8,
-//               }}>
-//               <Text
-//                 style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
-//                 onPress={increaseTimeLimit}>
-//                 느린걸음 ↑
-//               </Text>
-//             </View>
-//           </View>
-//         </View>
-//       )}
-
-//       <View style={{ marginTop: 20, alignItems: "center" }}>
-//         <Text style={{ fontSize: 12, color: "gray", textAlign: "center" }}>
-//           충격 방지 + 시간 제한 + 피크/골 감지
-//         </Text>
-//       </View>
+//       <Button title="🛑 종료" onPress={stopTracking} />
 //     </View>
 //   );
 // }

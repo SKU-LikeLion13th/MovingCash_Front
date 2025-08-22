@@ -8,7 +8,18 @@ module.exports = {
     "./screens/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        notoBold: ["NotoBold"],
+        notoSemiBold: ["NotoSemiBold"],
+        notoMedium: ["NotoMedium"],
+        notoRegular: ["NotoRegular"],
+        poppinsBold: ["PoppinsBold"],
+        poppinsSemiBold: ["PoppinsSemiBold"],
+        poppinsMedium: ["PoppinsMedium"],
+        poppinsRegular: ["PoppinsRegular"],
+      },
+    },
+    plugins: [],
   },
-  plugins: [],
 };

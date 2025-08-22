@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Svg, {
   Circle,
   Defs,
@@ -6,13 +6,12 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-import React, { useState } from "react";
+import React from "react";
 import RunningMotivation from "./RunningMotivation";
-
-type StatusType = "start" | "ongoing" | "stop" | "finish";
+import { useRunning } from "../context/RunningContext";
 
 export default function RunningTracker() {
-  const [status, setStatus] = useState<StatusType>("start");
+  const { status, distance, setStatus } = useRunning();
 
   const size = 180;
   const strokeWidth = 9;
@@ -42,7 +41,9 @@ export default function RunningTracker() {
             strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute text-[43px] text-white font-bold">Start</Text>
+        <Text className="absolute text-5xl text-white font-poppinsSemiBold">
+          Start
+        </Text>
       </View>
     </>
   );
@@ -88,7 +89,7 @@ export default function RunningTracker() {
 
     const centerX: number = size / 2;
     const centerY: number = size / 2;
-    const totalDegrees: number = -270; // 75% 원
+    const totalDegrees: number = -270; // 시계 반대방향으로 채워지는 75% 원
     const segments: number = 60; // 그라데이션 세그먼트 수
     const degreesPerSegment: number = totalDegrees / segments;
 
@@ -152,8 +153,8 @@ export default function RunningTracker() {
               );
             })}
           </Svg>
-          <Text className="absolute text-[43px] text-white font-bold">
-            1.2 <Text className="text-4xl">km</Text>
+          <Text className="absolute text-[43px] text-5xl text-white font-poppinsSemiBold">
+            {distance.toFixed(1)} <Text className="text-4xl">km</Text>
           </Text>
         </View>
       </>
@@ -176,10 +177,12 @@ export default function RunningTracker() {
             strokeDasharray={`${circumference * 0.75}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+        <Text className="absolute top-[65px] text-5xl text-white font-poppinsSemiBold">
           Stop
         </Text>
-        <Text className="absolute bottom-11 text-sm text-white">1.2km</Text>
+        <Text className="absolute bottom-11 text-base text-white font-poppinsRegular">
+          {distance.toFixed(1)} km
+        </Text>
       </View>
     </>
   );
@@ -200,10 +203,12 @@ export default function RunningTracker() {
             strokeDasharray={`${circumference * 0.5}, ${circumference * 0.25}`}
           />
         </Svg>
-        <Text className="absolute top-[52px] text-[43px] text-white font-bold">
+        <Text className="absolute top-[65px] text-5xl text-white font-poppinsSemiBold">
           Finish!
         </Text>
-        <Text className="absolute bottom-11 text-sm text-[#E9690D]">1.2km</Text>
+        <Text className="absolute bottom-11 text-base text-[#E9690D] font-poppinsRegular">
+          {distance.toFixed(1)} km
+        </Text>
       </View>
     </>
   );
@@ -223,45 +228,53 @@ export default function RunningTracker() {
     }
   };
 
-  /** ----- 버튼 UI ----- */
+  /* 버튼 UI */
   const renderButtons = () => {
     switch (status) {
       case "start":
         return (
-          <Pressable
+          <TouchableOpacity
             onPress={handleStart}
             className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg mt-3">
-            <Text className="text-white font-bold">시작하기</Text>
-          </Pressable>
+            <Text className="text-white text-base font-notoBold">시작하기</Text>
+          </TouchableOpacity>
         );
       case "ongoing":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+              <Text className="text-white text-base font-notoBold">
+                종료하기
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handlePause}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">일시정지</Text>
-            </Pressable>
+              <Text className="text-white text-base font-notoBold">
+                일시정지
+              </Text>
+            </TouchableOpacity>
           </View>
         );
       case "stop":
         return (
           <View className="flex-row justify-around w-full mt-3">
-            <Pressable
+            <TouchableOpacity
               onPress={handleFinish}
               className="w-[40%] h-10 flex justify-center items-center bg-[#4D4D4D] rounded-lg">
-              <Text className="text-white font-bold">종료하기</Text>
-            </Pressable>
-            <Pressable
+              <Text className="text-white text-base font-notoBold">
+                종료하기
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handleResume}
               className="w-[40%] h-10 flex justify-center items-center bg-[#E9690D] rounded-lg">
-              <Text className="text-white font-bold">이어달리기</Text>
-            </Pressable>
+              <Text className="text-white text-base font-notoBold">
+                이어달리기
+              </Text>
+            </TouchableOpacity>
           </View>
         );
       case "finish":

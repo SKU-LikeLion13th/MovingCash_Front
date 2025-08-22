@@ -1,35 +1,60 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import Header from "../../components/Header";
-import { Switch } from 'react-native-switch';
-import { useNavigation } from '@react-navigation/native';
+import { Switch } from "react-native-switch";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const [isEnabled, setIsEnabled] = useState(false);
   const navigation = useNavigation();
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://movingcash.sku-sku.com/auth/login", {
-        userId: id,
-        password: password,
-      });
+      const response = await axios.post(
+        "http://movingcash.sku-sku.com/auth/login",
+        {
+          userId: id,
+          password: password,
+        }
+      );
+      console.log(response.data);
 
       if (response.status === 200) {
+        const data = response.data;
+        const token = data.token;
+        const tokenType = data.tokenType;
+
+        if (!token || !tokenType) {
+          Alert.alert("로그인 실패", "토큰 정보를 받아오지 못했습니다.");
+          return;
+        }
+
+        await AsyncStorage.setItem(
+          "accessToken",
+          `${response.data.tokenType} ${response.data.token}`
+        );
         Alert.alert("로그인 성공", "환영합니다!");
-        // 여기를 수정해줘!
-        navigation.navigate("MainTab", { screen: "Main" }); // 이 부분!
+
+        navigation.navigate("MainTab", { screen: "Main" });
       }
     } catch (error: any) {
       console.error("로그인 실패:", error);
       Alert.alert("로그인 실패", "아이디/비밀번호를 확인해주세요.");
     }
   };
-  
+
   return (
     <View className="h-full bg-[#101010]">
       <Header title=" " />
@@ -57,7 +82,9 @@ export default function Login() {
           />
 
           <View className="flex-row items-center justify-end mb-5">
-            <Text className="text-[#FFFFFF] text-[11px] mr-2">로그인 상태유지</Text>
+            <Text className="text-[#FFFFFF] text-[11px] mr-2">
+              로그인 상태유지
+            </Text>
             <Switch
               value={isEnabled}
               onValueChange={toggleSwitch}
@@ -80,7 +107,7 @@ export default function Login() {
             />
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             className="items-center py-4 bg-[#E9690D] rounded-md mb-10"
             onPress={handleLogin}
           >
@@ -89,13 +116,22 @@ export default function Login() {
 
           <View className="flex flex-row items-center justify-center mb-20">
             <TouchableOpacity className="items-center">
-              <Text className="font-medium text-[10.5px] text-white">로그인</Text>
+              <Text className="font-medium text-[10.5px] text-white">
+                로그인
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity className="items-center">
-              <Text className="font-medium text-[10.5px] text-white mx-9">비밀번호 찾기</Text>
+              <Text className="font-medium text-[10.5px] text-white mx-9">
+                비밀번호 찾기
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity className="items-center" onPress={() => navigation.navigate('Nickname')}>
-              <Text className="font-medium text-[10.5px] text-white">회원가입</Text>
+            <TouchableOpacity
+              className="items-center"
+              onPress={() => navigation.navigate("Nickname")}
+            >
+              <Text className="font-medium text-[10.5px] text-white">
+                회원가입
+              </Text>
             </TouchableOpacity>
           </View>
 
