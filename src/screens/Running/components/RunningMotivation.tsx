@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRunning } from "../context/RunningContext";
 
 type StatusType = "start" | "ongoing" | "stop" | "finish";
 
@@ -9,7 +10,9 @@ interface RunningMotivationProps {
 }
 
 export default function RunningMotivation({ status }: RunningMotivationProps) {
-  const [user, setUser] = useState(null);
+  const { distance } = useRunning();
+  const [user, setUser] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -49,10 +52,17 @@ export default function RunningMotivation({ status }: RunningMotivationProps) {
     fetchUserData();
   }, []);
 
+  // 거리 조건에 따라 메시지 선택
   const messages: Record<StatusType, string> = {
     start: "무빙과 함께 뛰어볼까요?",
-    ongoing: `${user ? user + "님, " : ""}잘하고 계시네요!`,
-    stop: `${user ? user + "님, " : ""}잘하고 계시네요!`,
+    ongoing:
+      distance < 1
+        ? "오늘도 화이팅이에요!"
+        : `${user ? user + "님, " : ""}잘하고 계시네요!`,
+    stop:
+      distance < 1
+        ? "오늘도 화이팅이에요!"
+        : `${user ? user + "님, " : ""}잘하고 계시네요!`,
     finish: "오늘 러닝 완벽해요!",
   };
 

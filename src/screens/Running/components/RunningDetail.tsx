@@ -20,7 +20,7 @@ export default function RunningDetail() {
               Calories
             </Text>
             <Text className="text-white text-[22px] font-poppinsSemiBold">
-              {calories} kcal
+              {Math.round(calories)} kcal
             </Text>
           </View>
         </View>

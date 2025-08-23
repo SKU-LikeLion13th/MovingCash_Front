@@ -1,8 +1,54 @@
 import { View, Text } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRunning } from "../context/RunningContext";
 
 export default function RunningPoints() {
+  const [point, setPoint] = useState(0);
+  const { points } = useRunning();
+
+  useEffect(() => {
+    const fetchUserPoints = async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          console.warn("토큰이 없습니다. 로그인 필요!");
+          return;
+        }
+
+        const response = await fetch(
+          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "API 호출 실패:",
+            response.status,
+            await response.text()
+          );
+          return;
+        }
+
+        const data = await response.json();
+        setPoint(data.point);
+
+        console.log("사용자 포인트:", data.point);
+      } catch (error) {
+        console.error("API 호출 실패:", error);
+      }
+    };
+
+    fetchUserPoints();
+  }, []);
+
   return (
     <View className="my-8">
       {/* 현재 보유 포인트 */}
@@ -26,7 +72,9 @@ export default function RunningPoints() {
           />
         </Svg>
 
-        <Text className="text-white font-notoSemiBold text-[13px]">32,100</Text>
+        <Text className="text-white font-notoSemiBold text-[13px]">
+          {point.toLocaleString()}
+        </Text>
       </View>
 
       {/* 오늘의 러닝 적립 포인트 */}
@@ -50,7 +98,9 @@ export default function RunningPoints() {
           />
         </Svg>
 
-        <Text className="text-white font-notoSemiBold text-[13px]">70</Text>
+        <Text className="text-white font-notoSemiBold text-[13px]">
+          {points.toLocaleString()}
+        </Text>
       </View>
     </View>
   );
