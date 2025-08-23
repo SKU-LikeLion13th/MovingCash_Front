@@ -13,57 +13,58 @@ import Header from "src/components/Header";
 import { makeGoogleHtml } from "./GoogleHtml";
 import Search from "../../../assets/images/MovingSpot/Search.svg";
 import Constants from "expo-constants";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-//바텀시트
+// 바텀시트
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
-//다음페이지
+// 다음페이지
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "App";
 
-const BROWSER_KEY = (Constants.expoConfig?.extra as any)
-  ?.googleMapsKey as string;
+const BROWSER_KEY = (Constants.expoConfig?.extra as any)?.googleMapsKey as string;
 const BASE_URL = "http://localhost:8081";
+
+type LatLng = { lat: number; lng: number };
 
 export default function MovingSpot() {
   const webRef = useRef<WebView>(null);
   const watcherRef = useRef<Location.LocationSubscription | null>(null);
   const googleHtml = useMemo(() => makeGoogleHtml(BROWSER_KEY), [BROWSER_KEY]);
 
+  const [curPos, setCurPos] = useState<LatLng | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["4%", "20%", "35%"], []);
 
   const post = (msg: any) => webRef.current?.postMessage(JSON.stringify(msg));
 
-  //다음페이지
+  // 다음페이지
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
-  //로딩 상태/느림 표시
+  // 로딩 상태/느림 표시
   const [loading, setLoading] = useState(true);
   const [isSlow, setIsSlow] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-
-    //4초 지나면 “느려요” 메시지 켜기 (선택)
     const slowTimer = setTimeout(() => setIsSlow(true), 4000);
 
     (async () => {
-      // 권한 요청
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.warn("Location permission not granted");
-        setLoading(false); //권한 거부 시 로딩 종료
+        setLoading(false);
         return;
       }
 
       try {
-        // 현재 위치 1회
         const cur = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
+        setCurPos({ lat: cur.coords.latitude, lng: cur.coords.longitude });
         if (!mounted) return;
 
         post({
@@ -74,15 +75,13 @@ export default function MovingSpot() {
           follow: true,
         });
 
-        setLoading(false); //첫 좌표 받으면 로딩 종료
+        setLoading(false);
       } catch (e) {
         console.warn("getCurrentPositionAsync error", e);
-        // 상황에 따라 기본 위치로 카메라 이동만 하고 로딩 종료
         post({ type: "MOVE_CAMERA", lat: 37.5665, lng: 126.978, zoom: 12 });
         setLoading(false);
       }
 
-      // 위치 업데이트 확인
       watcherRef.current = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.Balanced,
@@ -91,6 +90,7 @@ export default function MovingSpot() {
           mayShowUserSettingsDialog: true,
         },
         (loc) => {
+          setCurPos({ lat: loc.coords.latitude, lng: loc.coords.longitude });
           post({
             type: "SET_CURRENT",
             lat: loc.coords.latitude,
@@ -98,7 +98,6 @@ export default function MovingSpot() {
             accuracy: loc.coords.accuracy,
             follow: false,
           });
-          // 이미 꺼졌을 가능성이 높지만 안전하게 한 번 더
           if (loading) setLoading(false);
         }
       );
@@ -108,7 +107,7 @@ export default function MovingSpot() {
       mounted = false;
       watcherRef.current?.remove();
       watcherRef.current = null;
-      clearTimeout(slowTimer); //타이머 정리
+      clearTimeout(slowTimer);
     };
   }, []);
 
@@ -131,7 +130,79 @@ export default function MovingSpot() {
       image: require("../../../assets/images/MovingSpot/Game.png"),
       style: "w-[50px] h-[50px] mb-[5px]",
     },
-  ];
+  ] as const;
+
+  const QUERY_MAP: Record<"food" | "cafe" | "fun", string> = {
+    food: "맛집",
+    cafe: "카페",
+    fun: "놀거리",
+  };
+
+  async function handleCategoryPress(type: "food" | "cafe" | "fun") {
+    if (!curPos) {
+      console.warn("현재 위치 미확인");
+      return;
+    }
+    try {
+      const payload = {
+        query: QUERY_MAP[type],
+        lat: curPos.lat,
+        lng: curPos.lng,
+        radius: 1000,
+        topK: 5,
+        page: 3,
+      };
+
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        console.warn("토큰이 없습니다. 로그인 필요!");
+        return;
+      }
+
+      const res = await axios.post(
+        "http://movingcash.sku-sku.com/movingspot/places",
+        payload,
+        {
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+          validateStatus: (s) => s === 200,
+        }
+      );
+
+      if (!Array.isArray(res.data)) {
+        console.warn("DATA SHAPE ERROR");
+        return;
+      }
+
+      const markers = (res.data as Array<any>)
+        .slice(0, payload.topK)
+        .map((p) => {
+          const lat = Number(p.lat ?? p.latitude);
+          const lng = Number(p.lng ?? p.longitude);
+          const rawRating = Number(
+            p.rating ?? p.rate ?? p.score ?? p.star ?? NaN
+          );
+          const rating = Number.isFinite(rawRating)
+            ? Number(rawRating).toFixed(1)
+            : "";
+
+          return {
+            lat,
+            lng,
+            title: String(p.name ?? ""),
+            subtitle: String(p.address ?? ""),
+            rating,
+          };
+        })
+        .filter((m) => Number.isFinite(m.lat) && Number.isFinite(m.lng));
+
+      post({ type: "SET_MARKERS", markers, fit: true });
+    } catch (e: any) {
+      console.warn("SEARCH REQ ERROR:", e?.message || String(e));
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -147,15 +218,12 @@ export default function MovingSpot() {
           domStorageEnabled
         />
 
-        {/*로딩 오버레이 */}
         {loading && (
           <View style={styles.overlay}>
             <ActivityIndicator size="large" />
             <Text style={styles.title}>현재 위치 찾는 중…</Text>
             <Text style={styles.sub}>
-              {isSlow
-                ? "GPS가 조금 느리네요. 잠시만요!"
-                : "위치 정보 가져오는 중"}
+              {isSlow ? "GPS가 조금 느리네요. 잠시만요!" : "위치 정보 가져오는 중"}
             </Text>
             {isSlow && (
               <Pressable style={styles.btn} onPress={() => setLoading(false)}>
@@ -165,7 +233,6 @@ export default function MovingSpot() {
           </View>
         )}
 
-        {/*바텀시트*/}
         <BottomSheet
           ref={sheetRef}
           index={0}
@@ -180,11 +247,7 @@ export default function MovingSpot() {
           handleIndicatorStyle={{ backgroundColor: "#ffffff80" }}
         >
           <BottomSheetScrollView
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingTop: 15,
-            }}
-            // scroll 시 시트 안에서만 스크롤되게
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 15 }}
             showsVerticalScrollIndicator={false}
           >
             <View className="w-full flex-row justify-center">
@@ -192,9 +255,9 @@ export default function MovingSpot() {
                 <Pressable
                   key={c.key}
                   className="bg-[#2E2E31] w-[30%] mx-2 p-3 rounded-3xl justify-center"
-                  onPress={() => {
-                    // TODO: 카테고리 클릭 액션
-                  }}
+                  onPress={() =>
+                    handleCategoryPress(c.key as "food" | "cafe" | "fun")
+                  }
                 >
                   <View className="flex-row justify-between">
                     <Image
@@ -213,9 +276,7 @@ export default function MovingSpot() {
 
             <Pressable
               onPress={() => {
-                //바텀 내려두고
                 sheetRef.current?.snapToIndex?.(0);
-                // Onboarding 화면으로 이동
                 navigation.navigate("Onboarding");
               }}
             >

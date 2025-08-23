@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import {
   View,
@@ -9,29 +9,32 @@ import {
   Dimensions,
   ImageSourcePropType,
   ImageStyle,
+  RefreshControl,
+  Alert,
 } from "react-native";
 import Header from "src/components/Header";
 import ChallengeCard from "./ChallengeCard";
 import Point from "../../../assets/icons/Point.svg";
-import { MainStackParamList } from "App"; 
+import { MainStackParamList } from "App";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type LevelCode = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 type ActivityCode = "RUNNING" | "WALKING";
 type ActivityImage = {
   src: ImageSourcePropType;
-  style?: ImageStyle; // 이미지마다 스케일/마진 보정
+  style?: ImageStyle;
 };
 
 type ChallengeItem = {
   id: number;
-  level: LevelCode; // "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
-  activity: ActivityCode; // "RUNNING" | "WALKING"
+  level: LevelCode;
+  activity: ActivityCode;
   title: string;
   reward: number;
-  status: boolean; // 유저 참여 여부
+  status: boolean;
 };
 
-//연결
 const LEVEL_KR: Record<LevelCode, "초급" | "중급" | "고급"> = {
   BEGINNER: "초급",
   INTERMEDIATE: "중급",
@@ -42,7 +45,6 @@ const ACTIVITY_KR: Record<ActivityCode, "러닝" | "걷기"> = {
   WALKING: "걷기",
 };
 
-// 카드 사이즈랑 배경색
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const H_PADDING = 24;
 const GAP = 15;
@@ -61,114 +63,10 @@ const IMAGE_BY_ACTIVITY: Record<ActivityCode, ActivityImage> = {
   },
 };
 
-//더미데이터
-const ALL: ChallengeItem[] = [
-  {
-    id: 1,
-    level: "BEGINNER",
-    activity: "WALKING",
-    title: "1000 보 걷기",
-    reward: 1000,
-    status: false,
-  },
-  {
-    id: 2,
-    level: "BEGINNER",
-    activity: "RUNNING",
-    title: "1km 러닝",
-    reward: 1000,
-    status: false,
-  },
-  {
-    id: 3,
-    level: "BEGINNER",
-    activity: "WALKING",
-    title: "30분 걷기",
-    reward: 1000,
-    status: false,
-  },
-  {
-    id: 4,
-    level: "BEGINNER",
-    activity: "RUNNING",
-    title: "5분 뛰기",
-    reward: 1000,
-    status: true,
-  },
-
-  {
-    id: 5,
-    level: "INTERMEDIATE",
-    activity: "WALKING",
-    title: "만보 걷기",
-    reward: 2000,
-    status: false,
-  },
-  {
-    id: 6,
-    level: "INTERMEDIATE",
-    activity: "RUNNING",
-    title: "5km 러닝",
-    reward: 2000,
-    status: true,
-  },
-  {
-    id: 7,
-    level: "INTERMEDIATE",
-    activity: "WALKING",
-    title: "1시간 걷기",
-    reward: 2000,
-    status: false,
-  },
-  {
-    id: 8,
-    level: "INTERMEDIATE",
-    activity: "RUNNING",
-    title: "10분 뛰기",
-    reward: 2000,
-    status: false,
-  },
-
-  {
-    id: 9,
-    level: "ADVANCED",
-    activity: "WALKING",
-    title: "2만보 걷기",
-    reward: 3000,
-    status: false,
-  },
-  {
-    id: 10,
-    level: "ADVANCED",
-    activity: "RUNNING",
-    title: "10km 러닝",
-    reward: 3000,
-    status: false,
-  },
-  {
-    id: 11,
-    level: "ADVANCED",
-    activity: "WALKING",
-    title: "2시간 걷기",
-    reward: 3000,
-    status: true,
-  },
-  {
-    id: 12,
-    level: "ADVANCED",
-    activity: "RUNNING",
-    title: "30분 뛰기",
-    reward: 3000,
-    status: false,
-  },
-];
-
-//토글안에서 버튼을 껐다켰다하는 함수
 function toggleIn<T>(arr: T[], v: T): T[] {
   return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 }
 
-//필터 로직
 function filterItems(
   data: ChallengeItem[],
   selectedLevels: LevelCode[],
@@ -184,36 +82,116 @@ function filterItems(
   });
 }
 
+const normalizeLevel = (v: any): LevelCode => {
+  const s = String(v || "").toUpperCase();
+  if (s === "BEGINNER" || s === "INTERMEDIATE" || s === "ADVANCED") return s;
+  return "BEGINNER";
+};
+
+const normalizeActivity = (v: any): ActivityCode => {
+  const s = String(v || "").toUpperCase();
+  if (s === "RUNNING" || s === "WALKING") return s;
+  // 혹시 서버가 RUN/WALK 같은 값을 준다면 안전망
+  if (s.startsWith("RUN")) return "RUNNING";
+  if (s.startsWith("WALK")) return "WALKING";
+  return "WALKING";
+};
+
+const toNumber = (v: any, d = 0) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
+};
+
+// 서버 응답 → 내부 모델 변환(필드명이 달라도 최대한 흡수)
+function mapServerItem(row: any): ChallengeItem {
+  return {
+    id: toNumber(row?.id),
+    level: normalizeLevel(row?.level ?? row?.difficulty),
+    activity: normalizeActivity(row?.activity ?? row?.type),
+    title: String(row?.title ?? row?.name ?? "제목 없음"),
+    reward: toNumber(row?.reward ?? row?.point, 0),
+    status: Boolean(row?.status ?? row?.joined ?? false),
+  };
+}
+
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
 export default function Challenge() {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
 
-  //네비게이트(props 내용 넘겨야함)
-  const handlePress = React.useCallback((item: ChallengeItem) => {
-    navigation.navigate("ChallengeDetail", {
-      id: item.id,
-      title: item.title,
-      reward: item.reward,
-      activity: item.activity,
-    });
-  }, [navigation]);
-  // 레벨/액티비티 각각 다중선택
+  const handlePress = useCallback(
+    (item: ChallengeItem) => {
+      navigation.navigate("ChallengeDetail", {
+        id: item.id,
+        title: item.title,
+        reward: item.reward,
+        activity: item.activity,
+      });
+    },
+    [navigation]
+  );
+
   const [selectedLevels, setSelectedLevels] = useState<LevelCode[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<ActivityCode[]>(
     []
   );
+  const [all, setAll] = useState<ChallengeItem[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // 전체 - 둘 다 초기화
   const clearAll = () => {
     setSelectedLevels([]);
     setSelectedActivities([]);
   };
 
   const data = useMemo(
-    () => filterItems(ALL, selectedLevels, selectedActivities),
-    [selectedLevels, selectedActivities]
+    () => filterItems(all, selectedLevels, selectedActivities),
+    [all, selectedLevels, selectedActivities]
   );
 
-  //카테고리 컴포넌트
+  const fetchChallenges = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        Alert.alert("로그인이 필요해요", "다시 로그인해 주세요.");
+        setAll([]);
+        return;
+      }
+      const date = todayStr();
+      console.log(date);
+      const res = await axios.get(`http://movingcash.sku-sku.com/challenge/all/${date}`, {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const list = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
+      const mapped: ChallengeItem[] = list.map(mapServerItem);
+      setAll(mapped);
+    } catch (e: any) {
+      console.warn("challenge fetch error:", e?.response?.status, e?.message);
+      Alert.alert("불러오기 실패", "챌린지 목록을 불러오지 못했어요.");
+      setAll([]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchChallenges();
+  }, [fetchChallenges]);
+
+  //ui
   const Chip = ({
     label,
     active,
@@ -241,7 +219,6 @@ export default function Challenge() {
     </Pressable>
   );
 
-  // 카드 렌더러
   const renderItem = ({
     item,
     index,
@@ -281,6 +258,9 @@ export default function Challenge() {
           rowGap: 5,
         }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetchChallenges} />
+        }
         ListHeaderComponent={
           <>
             <View
@@ -303,7 +283,7 @@ export default function Challenge() {
                 backgroundColor: "#fff",
                 borderTopLeftRadius: 30,
                 borderTopRightRadius: 30,
-                marginTop: -25, // 배너와 자연스럽게 겹치기
+                marginTop: -25,
                 paddingTop: 40,
                 marginHorizontal: -H_PADDING,
               }}
@@ -314,16 +294,13 @@ export default function Challenge() {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    columnGap: 8, 
+                    columnGap: 8,
                   }}
                 >
                   <Point width={25} height={25} />
                   <Text
                     className="font-black"
-                    style={{
-                      fontSize: 22,
-                      transform: [{ translateY: -0.5 }], 
-                    }}
+                    style={{ fontSize: 22, transform: [{ translateY: -0.5 }] }}
                   >
                     12,140 더 받을 수 있어요!
                   </Text>
