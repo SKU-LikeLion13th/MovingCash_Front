@@ -3,40 +3,33 @@ import WalkingTracker from "./components/WalkingTracker";
 import WalkingPoints from "./components/WalkingPoints";
 import WalkingDetail from "./components/WalkingDetail";
 import { View, ScrollView } from "react-native";
-import { useState } from "react";
+import { WalkingProvider } from "./context/WalkingContext";
 
 export default function Walking() {
-  const [elapsed, setElapsed] = useState(0);
-  const [formatted, setFormatted] = useState("00:00:00");
-
   return (
-    <View className="flex-1 bg-[#101010]">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="px-3">
-          <Header title="Walking" />
-          {/* WalkingTracker에서 시간 받아오기 */}
-          <WalkingTracker
-            onTimeUpdate={(sec, hhmmss) => {
-              setElapsed(sec);
-              setFormatted(hhmmss);
-            }}
-          />
-          <WalkingPoints />
-        </View>
-      </ScrollView>
+    <WalkingProvider>
+      <View className="flex-1 bg-[#101010]">
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+          <View className="px-3">
+            <Header title="Walking" />
+            <WalkingTracker />
+            <WalkingPoints />
+          </View>
+        </ScrollView>
 
-      {/* 하단 BottomSheet */}
-      <View
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: "100%",
-        }}>
-        <WalkingDetail elapsed={elapsed} formatted={formatted} />
+        {/* 하단 BottomSheet */}
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: "100%",
+          }}>
+          <WalkingDetail />
+        </View>
       </View>
-    </View>
+    </WalkingProvider>
   );
 }
 

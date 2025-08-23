@@ -1,22 +1,15 @@
 import { View, Text } from "react-native";
 import React, { useRef, useMemo } from "react";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { useWalking } from "../context/WalkingContext";
 
-export default function WalkingDetail({
-  elapsed,
-  formatted,
-}: {
-  elapsed: number;
-  formatted: string;
-}) {
+export default function WalkingDetail() {
+  const { elapsed, distance, pace, calories } = useWalking();
+
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["4%", "30%"], []);
 
   const displayTime = (seconds: number) => {
-    // const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
-    // const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-    // const s = String(seconds % 60).padStart(2, "0");
-    // return `${h}:${m}:${s}`;
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     return `${h}h ${m}min`;
@@ -47,7 +40,7 @@ export default function WalkingDetail({
               거리
             </Text>
             <Text className="text-black text-5xl font-poppinsSemiBold">
-              0km
+              {distance.toFixed(1)}km
             </Text>
           </View>
 
@@ -58,7 +51,7 @@ export default function WalkingDetail({
                 페이스
               </Text>
               <Text className="text-orange-500 text-xl font-poppinsSemiBold">
-                0 km/h
+                {pace.toFixed(1)} km/h
               </Text>
             </View>
 
@@ -76,7 +69,7 @@ export default function WalkingDetail({
                 칼로리
               </Text>
               <Text className="text-orange-500 text-xl font-poppinsSemiBold">
-                0 kcal
+                {Math.round(calories)} kcal
               </Text>
             </View>
           </View>
