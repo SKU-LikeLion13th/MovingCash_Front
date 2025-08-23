@@ -9,55 +9,12 @@ import Svg, {
 import React from "react";
 import WalkingMotivation from "./WalkingMotivation";
 import { useWalking } from "../context/WalkingContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function WalkingTracker() {
   const { status, steps, setStatus } = useWalking();
 
-  /* 상태 전환 핸들러 */
-  const handleStart = () => {
-    const requestStart = async () => {
-      try {
-        const token = await AsyncStorage.getItem("accessToken");
-        if (!token) {
-          console.warn("토큰이 없습니다. 로그인 필요!");
-          return;
-        }
-
-        const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/start",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              status: "WALKING",
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          console.error(
-            "API 호출 실패:",
-            response.status,
-            await response.text()
-          );
-          return;
-        }
-
-        const data = await response.json();
-
-        setStatus("ongoing");
-      } catch (error) {
-        console.error("API 호출 실패:", error);
-      }
-    };
-
-    requestStart();
-  };
-
+  /* 상태 전환 핸들러 - WalkingContext에서 API 처리 */
+  const handleStart = () => setStatus("ongoing");
   const handlePause = () => setStatus("stop");
   const handleResume = () => setStatus("ongoing");
   const handleFinish = () => setStatus("finish");
