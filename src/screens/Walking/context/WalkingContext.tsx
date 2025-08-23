@@ -58,6 +58,9 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [points, setPoints] = useState(0);
 
+  // 웹소켓 데이터 한번이라도 주고받았는지
+  const [hasDataBeenSent, setHasDataBeenSent] = useState(false);
+
   // Refs (항상 최신값 미러)
   const statusRef = useRef<StatusType>(status);
   const stepsRef = useRef<number>(steps);
@@ -67,6 +70,7 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
   const paceRef = useRef<number>(pace);
   const caloriesRef = useRef<number>(calories);
   const pointsRef = useRef<number>(points);
+  const hasDataBeenSentRef = useRef<boolean>(hasDataBeenSent);
 
   useEffect(() => {
     statusRef.current = status;
@@ -92,6 +96,9 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
   useEffect(() => {
     pointsRef.current = points;
   }, [points]);
+  useEffect(() => {
+    hasDataBeenSentRef.current = hasDataBeenSent;
+  }, [hasDataBeenSent]);
 
   // Intervals/Timeouts/WebSocket
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // timer
@@ -167,6 +174,8 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
     setPace(0);
     setCalories(0);
     setPoints(0);
+    setHasDataBeenSent(false);
+    hasDataBeenSentRef.current = false;
     pointIndexRef.current = 1;
     resetSteps();
   };
@@ -179,6 +188,17 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
         console.error("토큰이 없습니다.");
         return;
       }
+
+      // 여러 조건 중 하나라도 만족하면 세션 종료 API 호출
+      const shouldCallEndAPI = hasDataBeenSentRef.current; // 데이터가 한 번이라도 전송됨
+
+      if (!shouldCallEndAPI) {
+        console.log(
+          "세션이 너무 짧거나 데이터가 없어서 종료 API 호출을 생략합니다."
+        );
+        return { success: true, message: "세션이 정상적으로 취소되었습니다." };
+      }
+
       const payload = {
         totalCalories: caloriesRef.current,
         totalDistance: distanceRef.current,
@@ -202,6 +222,8 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
       return json;
     } catch (e) {
       console.error("세션 종료 API 오류:", e);
+      // 에러가 발생해도 앱이 멈추지 않도록 기본 응답 반환
+      return { success: false, error: e };
     }
   };
 
@@ -484,6 +506,11 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
           ws.send(JSON.stringify(payload));
           console.log("위치 전송:", payload);
           pointIndexRef.current += 1;
+
+          // 첫 데이터 전송 시 플래그 설정
+          if (!hasDataBeenSentRef.current) {
+            setHasDataBeenSent(true);
+          }
         } catch (e) {
           console.error("위치 전송 실패:", e);
           reconnectWebSocket();
