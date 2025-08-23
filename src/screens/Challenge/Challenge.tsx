@@ -150,8 +150,19 @@ export default function Challenge() {
   };
 
   const data = useMemo(
-    () => filterItems(all, selectedLevels, selectedActivities),
+    () =>
+      filterItems(all, selectedLevels, selectedActivities)
+        .slice()
+        .sort((a, b) => {
+          if (a.status === b.status) return 0;
+          return a.status ? 1 : -1;
+        }),
     [all, selectedLevels, selectedActivities]
+  );
+
+  const totalReward = useMemo(
+    () => all.reduce((sum, item) => sum + item.reward, 0),
+    [all]
   );
 
   const fetchChallenges = useCallback(async () => {
@@ -164,13 +175,15 @@ export default function Challenge() {
         return;
       }
       const date = todayStr();
-      console.log(date);
-      const res = await axios.get(`http://movingcash.sku-sku.com/challenge/all/${date}`, {
-        headers: {
-          Authorization: `${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await axios.get(
+        `http://movingcash.sku-sku.com/challenge/all/${date}`,
+        {
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const list = Array.isArray(res.data)
         ? res.data
         : Array.isArray(res.data?.data)
@@ -302,7 +315,7 @@ export default function Challenge() {
                     className="font-black"
                     style={{ fontSize: 22, transform: [{ translateY: -0.5 }] }}
                   >
-                    12,140 더 받을 수 있어요!
+                    {totalReward.toLocaleString()} 더 받을 수 있어요!
                   </Text>
                 </View>
               </View>

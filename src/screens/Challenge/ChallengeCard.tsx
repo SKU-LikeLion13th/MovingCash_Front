@@ -72,9 +72,23 @@ export default function ChallengeCard({
 
       {/*참여 여부 띄우기*/}
       {item.status && (
-        <View className="absolute left-3 top-3 bg-black/70 px-2 py-1 rounded-full">
-          <Text className="text-[10px] text-white">참여중</Text>
-        </View>
+        <>
+          <View className="absolute left-3 top-3 bg-black/70 px-2 py-1 rounded-full">
+            <Text className="text-[10px] text-white">참여완료</Text>
+          </View>
+
+          {/* 회색 오버레이 */}
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.3)", // 살짝 회색 느낌
+            }}
+          />
+        </>
       )}
 
       {/* Text Area */}

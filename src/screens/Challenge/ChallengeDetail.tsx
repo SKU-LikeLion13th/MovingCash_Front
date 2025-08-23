@@ -6,6 +6,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import Header from "src/components/Header";
 import Point from "../../../assets/icons/Point.svg";
 import ChallengeModal from "./ChallengeModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 type DetailRoute = RouteProp<MainStackParamList, "ChallengeDetail">;
 
@@ -14,6 +16,24 @@ const walkingImg = require("../../../assets/images/Challenge/walking.png");
 
 const RUNNING_STYLE: ImageStyle = { width: "30%" };
 const WALKING_STYLE: ImageStyle = { width: "40%", marginRight: 30 };
+
+const todayStr = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}T00:00:00`;
+};
+
+const parseGoalFromTitle = (title: string, activity: "WALKING" | "RUNNING") => {
+  const t = (title || "").toLowerCase();
+  if (activity === "WALKING") {
+    const stepMatch = t.match(/(\d{1,3}(?:,\d{3})*|\d+)\s*보/);
+    return stepMatch ? Number(stepMatch[1].replace(/,/g, "")) : 0;
+  }
+  const kmMatch = t.match(/(\d+(?:\.\d+)?)\s*km/);
+  return kmMatch ? parseFloat(kmMatch[1]) : 0;
+};
 
 export default function ChallengeDetail() {
   const { params } = useRoute<DetailRoute>();
@@ -24,25 +44,92 @@ export default function ChallengeDetail() {
   const imgStyle = activity === "WALKING" ? WALKING_STYLE : RUNNING_STYLE;
 
   //진행도 임시 설정
-  const current = 1000;
-  const goal = 1000;
-  const pct = Math.max(0, Math.min(1, current / goal));
+  const [current, setCurrent] = React.useState(0);
+  const goal = React.useMemo(
+    () => parseGoalFromTitle(title, activity as "WALKING" | "RUNNING"),
+    [title, activity]
+  );
+  const pct = Math.max(0, Math.min(1, goal > 0 ? current / goal : 0));
   const isComplete = pct >= 1;
 
   const [showModal, setShowModal] = React.useState(false);
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (!isComplete) return;
-    // TODO: 완료 처리
-
-    setShowModal(true);
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) return;
+      await axios.post(
+        "http://movingcash.sku-sku.com/join/add",
+        { challengeId: id },
+        {
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setShowModal(true);
+    } catch (e: any) {
+      console.warn("join add error:", e?.response?.status, e?.message);
+    }
   };
 
   const handleClaim = () => {
-    // TODO: 포인트 수령 로직 (API 호출/상태 업데이트 등)
     setShowModal(false);
   };
 
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) return;
+
+        const today = todayStr();
+        const body =
+          activity === "WALKING"
+            ? {
+                status: "WALKING",
+                startDate: today,
+                endDate: today,
+                todayDate: today,
+              }
+            : {
+                status: "RUNNING",
+                startDate: today,
+                endDate: today,
+                todayDate: today,
+              };
+
+        const res = await axios.post(
+          "http://movingcash.sku-sku.com/mainPage",
+          body,
+          {
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(res.data);
+
+        if (activity === "WALKING") {
+          setCurrent(Number(res.data?.steps) || 0);
+        } else {
+          setCurrent(Number(res.data?.totalDistance) || 0);
+        }
+      } catch (e: any) {
+        console.warn("mainPage fetch error:", e?.response?.status, e?.message);
+        setCurrent(0);
+      }
+    })();
+  }, [activity, title]);
+
+  const unit = activity === "WALKING" ? "steps" : "km";
+  const formatVal = (v: number) =>
+    activity === "WALKING"
+      ? Math.max(0, Math.floor(v)).toLocaleString()
+      : (Math.round(v * 100) / 100).toFixed(2);
 
   return (
     <View className="flex-1 bg-[#101010]">
@@ -56,20 +143,20 @@ export default function ChallengeDetail() {
             {/*진행도*/}
             <View className="mt-3 w-full flex-row justify-between items-end mb-2">
               <Text className="text-[16px] font-semibold">
-                <Text className="text-[#E9690D]">
-                  {current.toLocaleString()}
-                </Text>
+                <Text className="text-[#E9690D]">{formatVal(current)}</Text>
                 <Text className="text-gray-200 text-xs font-medium">
                   {" "}
-                  steps
+                  {unit}
                 </Text>
               </Text>
 
               <Text className="text-[16px] font-semibold">
-                <Text className="text-[#E9690D]">{goal.toLocaleString()}</Text>
+                <Text className="text-[#E9690D]">
+                  {activity === "WALKING" ? formatVal(goal) : formatVal(goal)}
+                </Text>
                 <Text className="text-gray-200 text-xs font-medium">
                   {" "}
-                  steps
+                  {unit}
                 </Text>
               </Text>
             </View>
@@ -84,9 +171,7 @@ export default function ChallengeDetail() {
             </View>
 
             {/*걸으러가기?*/}
-            <View className="h-[35%]">
-
-            </View>
+            <View className="h-[35%]"></View>
 
             {/*리워드*/}
             <Text className="text-xl font-bold">포인트 획득</Text>
@@ -94,7 +179,7 @@ export default function ChallengeDetail() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginTop:15
+                marginTop: 15,
               }}
             >
               <Text
