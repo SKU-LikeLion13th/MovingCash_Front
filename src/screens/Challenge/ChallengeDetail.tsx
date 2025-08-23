@@ -141,7 +141,7 @@ export default function ChallengeDetail() {
             <Text className="text-xl font-bold">{title} 챌린지</Text>
 
             {/*진행도*/}
-            <View className="mt-3 w-full flex-row justify-between items-end mb-2">
+            <View className="mt-5 w-full flex-row justify-between items-end mb-2">
               <Text className="text-[16px] font-semibold">
                 <Text className="text-[#E9690D]">{formatVal(current)}</Text>
                 <Text className="text-gray-200 text-xs font-medium">
@@ -171,7 +171,7 @@ export default function ChallengeDetail() {
             </View>
 
             {/*걸으러가기?*/}
-            <View className="h-[35%]"></View>
+            <View className="h-[30%]"></View>
 
             {/*리워드*/}
             <Text className="text-xl font-bold">포인트 획득</Text>

@@ -15,11 +15,7 @@ import Search from "../../../assets/images/MovingSpot/Search.svg";
 import Constants from "expo-constants";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// 바텀시트
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-
-// 다음페이지
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "App";
@@ -40,13 +36,14 @@ export default function MovingSpot() {
 
   const post = (msg: any) => webRef.current?.postMessage(JSON.stringify(msg));
 
-  // 다음페이지
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
-  // 로딩 상태/느림 표시
   const [loading, setLoading] = useState(true);
   const [isSlow, setIsSlow] = useState(false);
+
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchLabel, setSearchLabel] = useState<string>("");
 
   useEffect(() => {
     let mounted = true;
@@ -143,6 +140,12 @@ export default function MovingSpot() {
       console.warn("현재 위치 미확인");
       return;
     }
+
+    const label =
+      type === "food" ? "맛집 찾는 중…" : type === "cafe" ? "카페 찾는 중…" : "놀거리 찾는 중…";
+    setSearchLabel(label);
+    setSearchLoading(true);
+
     try {
       const payload = {
         query: QUERY_MAP[type],
@@ -201,6 +204,9 @@ export default function MovingSpot() {
       post({ type: "SET_MARKERS", markers, fit: true });
     } catch (e: any) {
       console.warn("SEARCH REQ ERROR:", e?.message || String(e));
+    } finally {
+      setSearchLoading(false);
+      setSearchLabel("");
     }
   }
 
@@ -218,17 +224,23 @@ export default function MovingSpot() {
           domStorageEnabled
         />
 
-        {loading && (
+        {(loading || searchLoading) && (
           <View style={styles.overlay}>
             <ActivityIndicator size="large" />
-            <Text style={styles.title}>현재 위치 찾는 중…</Text>
-            <Text style={styles.sub}>
-              {isSlow ? "GPS가 조금 느리네요. 잠시만요!" : "위치 정보 가져오는 중"}
+            <Text style={styles.title}>
+              {searchLoading ? searchLabel : "현재 위치 찾는 중…"}
             </Text>
-            {isSlow && (
-              <Pressable style={styles.btn} onPress={() => setLoading(false)}>
-                <Text style={styles.btnText}>그냥 지도부터 볼래</Text>
-              </Pressable>
+            {!searchLoading && (
+              <>
+                <Text style={styles.sub}>
+                  {isSlow ? "GPS가 조금 느리네요. 잠시만요!" : "위치 정보 가져오는 중"}
+                </Text>
+                {isSlow && (
+                  <Pressable style={styles.btn} onPress={() => setLoading(false)}>
+                    <Text style={styles.btnText}>그냥 지도부터 볼래</Text>
+                  </Pressable>
+                )}
+              </>
             )}
           </View>
         )}
@@ -258,6 +270,8 @@ export default function MovingSpot() {
                   onPress={() =>
                     handleCategoryPress(c.key as "food" | "cafe" | "fun")
                   }
+                  disabled={searchLoading}
+                  style={{ opacity: searchLoading ? 0.6 : 1 }}
                 >
                   <View className="flex-row justify-between">
                     <Image
