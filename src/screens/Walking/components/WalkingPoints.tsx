@@ -3,14 +3,21 @@ import React, { useEffect, useState } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { RootTabParamList } from "../../../../App";
+import { NavigationProp } from "@react-navigation/native";
 import { useWalking } from "../context/WalkingContext";
+
+// 전체 네비게이션 구조를 포함하는 타입 정의
+type RootNavigationParamList = {
+  StartStack: {
+    screen: string;
+  };
+  MainTabs: undefined;
+};
 
 export default function WalkingPoints() {
   const [point, setPoint] = useState(0);
   const { points } = useWalking();
-  const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
+  const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -18,7 +25,8 @@ export default function WalkingPoints() {
         const token = await AsyncStorage.getItem("accessToken");
         if (!token) {
           console.warn("토큰이 없습니다. 로그인 필요!");
-          navigation.navigate("StartTab");
+          // 스택 네비게이션으로 올바르게 이동
+          navigation.navigate("StartStack", { screen: "Start" });
           return;
         }
 
@@ -37,7 +45,8 @@ export default function WalkingPoints() {
           if (response.status === 401) {
             console.warn("인증 토큰이 만료되었습니다. 다시 로그인해주세요.");
             await AsyncStorage.removeItem("accessToken");
-            navigation.navigate("StartTab");
+            // 스택 네비게이션으로 올바르게 이동
+            navigation.navigate("StartStack", { screen: "Login" });
             return;
           }
 

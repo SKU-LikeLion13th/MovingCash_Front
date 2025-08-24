@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useRunning } from "../context/RunningContext";
-import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { RootTabParamList } from "../../../../App";
 
 type StatusType = "start" | "ongoing" | "stop" | "finish";
 
@@ -15,7 +13,7 @@ interface RunningMotivationProps {
 export default function RunningMotivation({ status }: RunningMotivationProps) {
   const { distance } = useRunning();
   const [user, setUser] = useState<string | null>(null);
-  const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -23,8 +21,19 @@ export default function RunningMotivation({ status }: RunningMotivationProps) {
         const token = await AsyncStorage.getItem("accessToken");
         if (!token) {
           console.warn("토큰이 없습니다. 로그인 필요!");
-          // 토큰이 없으면 StartTab의 Login으로 이동
-          navigation.navigate("StartTab");
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "StartStack",
+                  state: {
+                    routes: [{ name: "Login" }],
+                  },
+                },
+              ],
+            })
+          );
           return;
         }
 
@@ -41,10 +50,21 @@ export default function RunningMotivation({ status }: RunningMotivationProps) {
 
         if (!response.ok) {
           if (response.status === 401) {
-            // 401 에러 시 토큰 삭제 후 StartTab의 Login으로 이동
             console.warn("인증 토큰이 만료되었습니다. 다시 로그인해주세요.");
             await AsyncStorage.removeItem("accessToken");
-            navigation.navigate("StartTab");
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: "StartStack",
+                    state: {
+                      routes: [{ name: "Login" }],
+                    },
+                  },
+                ],
+              })
+            );
             return;
           }
 

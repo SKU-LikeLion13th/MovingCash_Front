@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { RootTabParamList } from "../../../../App";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useWalking } from "../context/WalkingContext";
 
 type StatusType = "start" | "ongoing" | "stop" | "finish";
@@ -15,7 +13,7 @@ interface WalkingMotivationProps {
 export default function WalkingMotivation({ status }: WalkingMotivationProps) {
   const [yesterdayStep, setYesterdayStep] = useState(0);
   const { points, steps } = useWalking();
-  const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -23,8 +21,20 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
         const token = await AsyncStorage.getItem("accessToken");
         if (!token) {
           console.warn("토큰이 없습니다. 로그인 필요!");
-          // 토큰이 없으면 StartTab으로 이동
-          navigation.navigate("StartTab");
+          // 네비게이션 스택을 리셋하여 로그인 화면으로 이동
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "StartStack",
+                  state: {
+                    routes: [{ name: "Login" }],
+                  },
+                },
+              ],
+            })
+          );
           return;
         }
 
@@ -41,10 +51,22 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
 
         if (!response.ok) {
           if (response.status === 401) {
-            // 401 에러 시 토큰 삭제 후 StartTab으로 이동
+            // 401 에러 시 토큰 삭제 후 로그인 화면으로 이동
             console.warn("인증 토큰이 만료되었습니다. 다시 로그인해주세요.");
             await AsyncStorage.removeItem("accessToken");
-            navigation.navigate("StartTab");
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: "StartStack",
+                    state: {
+                      routes: [{ name: "Login" }],
+                    },
+                  },
+                ],
+              })
+            );
             return;
           }
 
