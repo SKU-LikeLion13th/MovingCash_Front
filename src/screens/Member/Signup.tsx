@@ -54,7 +54,7 @@ export default function Signup() {
 
       if (response.status === 200 || response.status === 201) {
         Alert.alert("회원가입 성공!", "로그인 화면으로 이동합니다.", [
-          { text: "확인", onPress: () => navigation.navigate("StartTab") },
+          { text: "확인", onPress: () => navigation.navigate("Login") },
         ]);
       } else {
         Alert.alert("회원가입 실패", "다시 시도해주세요.");
