@@ -402,7 +402,10 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
           lng: loc.lng,
           step: 0, // 러닝에서는 만보기 사용하지 않으므로 0으로 고정
           pointIndex: pointIndexRef.current,
-          timestamp: new Date().toISOString(),
+          timestamp:
+            new Date()
+              .toLocaleString("sv-SE", { timeZone: "Asia/Seoul" })
+              .replace(" ", "T") + "+09:00",
           durationStr: formatTime(elapsedRef.current), // 실시간 계산
         };
         try {

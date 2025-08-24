@@ -19,8 +19,8 @@ export default function RunningDetail() {
             <Text className="text-[#E9690D] text-xs font-poppinsRegular">
               Calories
             </Text>
-            <Text className="text-white text-[22px] font-poppinsSemiBold">
-              {Math.round(calories)} kcal
+            <Text className="text-white text-xl font-poppinsSemiBold">
+              {Math.round(calories)} <Text className="text-lg">kcal</Text>
             </Text>
           </View>
         </View>
@@ -36,8 +36,8 @@ export default function RunningDetail() {
             <Text className="text-[#E9690D] text-xs font-poppinsRegular">
               Distance
             </Text>
-            <Text className="text-white text-[22px] font-poppinsSemiBold">
-              {distance.toFixed(1)} km
+            <Text className="text-white text-xl font-poppinsSemiBold">
+              {distance.toFixed(1)} <Text className="text-lg">km</Text>
             </Text>
           </View>
         </View>
@@ -56,8 +56,8 @@ export default function RunningDetail() {
             <Text className="text-[#E9690D] text-xs font-poppinsRegular">
               Pace
             </Text>
-            <Text className="text-white text-[22px] font-poppinsSemiBold">
-              {pace.toFixed(1)} km/h
+            <Text className="text-white text-xl font-poppinsSemiBold">
+              {pace.toFixed(1)} <Text className="text-lg">km/h</Text>
             </Text>
           </View>
         </View>
@@ -74,7 +74,7 @@ export default function RunningDetail() {
             <Text className="text-[#E9690D] text-xs font-poppinsRegular">
               Time
             </Text>
-            <Text className="text-white text-[22px] font-poppinsSemiBold">
+            <Text className="text-white text-xl font-poppinsSemiBold">
               {formatted}
             </Text>
           </View>

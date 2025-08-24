@@ -75,7 +75,7 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
     if (status === "finish") {
       const parts = message.split(`${points}p`);
       return (
-        <Text className="text-center text-xl text-white font-notoBold mt-4">
+        <Text className="text-center text-lg text-white font-notoBold mt-4">
           {parts[0]}
           <Text style={{ color: "#E9690D" }}>{points}p</Text>
           {parts[1]}
@@ -84,7 +84,7 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
     }
 
     return (
-      <Text className="text-center text-xl text-white font-notoBold mt-4">
+      <Text className="text-center text-lg text-white font-notoBold mt-4">
         {message}
       </Text>
     );
