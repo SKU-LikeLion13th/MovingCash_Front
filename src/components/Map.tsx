@@ -2,6 +2,8 @@ import React, { useState, useEffect, JSX } from "react";
 import { View, Dimensions, Alert, StyleProp, ViewStyle } from "react-native";
 import MapView, { Marker, Polyline, Region, LatLng } from "react-native-maps";
 import * as Location from "expo-location";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Map(): JSX.Element {
   const { width, height } = Dimensions.get("window");
@@ -9,67 +11,62 @@ export default function Map(): JSX.Element {
   const [currentLocation, setCurrentLocation] = useState<LatLng | null>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<LatLng[]>([]);
 
-  // 위치 권한 요청 및 현재 위치 가져오기
   useEffect(() => {
     (async () => {
+      // 위치 권한 요청
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("위치 권한이 필요합니다!");
         return;
       }
 
+      // 현재 위치 가져오기
       const location = await Location.getCurrentPositionAsync({});
       const initialLatLng: LatLng = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
       setCurrentLocation(initialLatLng);
-      setRouteCoordinates([initialLatLng]);
+
+      const today = new Date();
+      const todayISO = today.toISOString().split("T")[0] + "T00:00:00";
+
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        console.warn("토큰이 없습니다. 로그인 필요!");
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "http://movingcash.sku-sku.com/mainPage",
+          {
+            status: "RUNNING",
+            startDate: todayISO,
+            endDate: todayISO,
+            todayDate: todayISO,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${token}`,
+            },
+          }
+        );
+
+        const path: LatLng[] = response.data.recentPath || [];
+        if (path.length > 0) {
+          setRouteCoordinates(path);
+        } else {
+          setRouteCoordinates([initialLatLng]); // fallback
+        }
+      } catch (err) {
+        console.error(err);
+        Alert.alert("최근 이동 경로를 불러오는데 실패했습니다.");
+        setRouteCoordinates([initialLatLng]);
+      }
     })();
   }, []);
-
-  // 이동 경로 시뮬레이션
-  useEffect(() => {
-    if (!currentLocation) return;
-
-    const exampleRoute: LatLng[] = [
-      {
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-      },
-      {
-        latitude: currentLocation.latitude + 0.0005,
-        longitude: currentLocation.longitude + 0.0005,
-      },
-      {
-        latitude: currentLocation.latitude + 0.001,
-        longitude: currentLocation.longitude + 0.001,
-      },
-      {
-        latitude: currentLocation.latitude + 0.0015,
-        longitude: currentLocation.longitude + 0.0015,
-      },
-      {
-        latitude: currentLocation.latitude + 0.002,
-        longitude: currentLocation.longitude + 0.002,
-      },
-    ];
-
-    let index = 1; // 첫 좌표는 이미 routeCoordinates에 있음
-    const interval = setInterval(() => {
-      setRouteCoordinates((prev) => {
-        if (index >= exampleRoute.length) {
-          clearInterval(interval);
-          return prev;
-        }
-        const next = exampleRoute[index];
-        index += 1;
-        return [...prev, next];
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [currentLocation]);
 
   if (!currentLocation) {
     return <View className="flex-1 justify-center items-center bg-[#101010]" />;

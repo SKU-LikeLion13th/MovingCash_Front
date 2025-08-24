@@ -7,6 +7,7 @@ import RunningPoints from "./components/RunningPoints";
 import RunningDetail from "./components/RunningDetail";
 import Map from "src/components/Map";
 import { RunningProvider } from "./context/RunningContext";
+import RealTimeMap from '../../components/RealTimeMap';
 
 export default function Running() {
   return (
@@ -19,7 +20,7 @@ export default function Running() {
           <RunningTracker />
           <RunningPoints />
           <RunningDetail />
-          <Map />
+          <RealTimeMap />
         </View>
       </ScrollView>
     </RunningProvider>

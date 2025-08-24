@@ -26,6 +26,7 @@ import AvailablePoints from "src/screens/Point/AvailablePoints";
 import UsePoint from "src/screens/Point/UsePoint";
 
 import Map from "src/components/Map";
+import RealTimeMap from "src/components/RealTimeMap";
 import Splash from "src/screens/Member/Splash";
 import Login from "src/screens/Member/Login";
 import Signup from "src/screens/Member/Signup";
@@ -43,11 +44,10 @@ export type RootTabParamList = {
 
 export type StartStackParamList = {
   Map: undefined;
+  RealTimeMap: undefined;
   Splash: undefined;
   Login: undefined;
-  Nickname: undefined;
-  Id: undefined;
-  Pw: undefined;
+  Signup: undefined;
   Start: undefined;
 };
 
@@ -104,6 +104,7 @@ function StartStackScreen() {
     <StartStack.Navigator screenOptions={{ headerShown: false }}>
       <StartStack.Screen name="Login" component={Login} />
       <StartStack.Screen name="Map" component={Map} />
+      <StartStack.Screen name="RealTimeMap" component={RealTimeMap} />
       <StartStack.Screen name="Splash" component={Splash} />
       <StartStack.Screen name="Signup" component={Signup} />
       <StartStack.Screen name="Start" component={Start} />
