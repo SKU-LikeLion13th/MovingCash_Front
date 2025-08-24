@@ -1,64 +1,65 @@
 import { View, Text, Image } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Profile() {
   const imageSize = 60; // 이미지 크기
   const strokeWidth = 4; // 테두리 두께
-  const ringSize = imageSize + strokeWidth * 2; // 이미지보다 조금 크게
+  const ringSize = imageSize + strokeWidth * 2;
   const radius = ringSize / 2 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = 0.7; // 70% 진행
 
   const [name, setName] = useState<string>("User");
 
-  useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const token = await AsyncStorage.getItem("accessToken");
-        if (!token) {
-          console.warn("토큰이 없습니다. 로그인 필요!");
-          return;
-        }
-
-        const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
-          {
-            method: "GET",
-            headers: {
-              Authorization: token,
-              "Content-Type": "application/json",
-            },
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserName = async () => {
+        try {
+          const token = await AsyncStorage.getItem("accessToken");
+          if (!token) {
+            console.warn("토큰이 없습니다. 로그인 필요!");
+            return;
           }
-        );
 
-        if (!response.ok) {
-          console.error(
-            "API 호출 실패:",
-            response.status,
-            await response.text()
+          const response = await fetch(
+            "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+            {
+              method: "GET",
+              headers: {
+                Authorization: token,
+                "Content-Type": "application/json",
+              },
+            }
           );
-          return;
+
+          if (!response.ok) {
+            console.error(
+              "API 호출 실패:",
+              response.status,
+              await response.text()
+            );
+            return;
+          }
+
+          const data = await response.json();
+          setName(data.name);
+        } catch (error) {
+          console.error("API 호출 실패:", error);
         }
+      };
 
-        const data = await response.json();
-        setName(data.name);
-      } catch (error) {
-        console.error("API 호출 실패:", error);
-      }
-    };
-
-    fetchUserName();
-  }, []);
+      fetchUserName();
+    }, [])
+  );
 
   return (
     <View className="flex flex-row items-center">
-      {/* 이미지 */}
+      {/* 프로필 이미지 + 원형 테두리 */}
       <View style={{ position: "relative", width: ringSize, height: ringSize }}>
-        {/* SVG 테두리 */}
         <Svg
           height={ringSize}
           width={ringSize}
@@ -74,12 +75,9 @@ export default function Profile() {
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
             strokeLinecap="round"
-            rotation="0"
-            origin={`${ringSize / 2}, ${ringSize / 2}`}
           />
         </Svg>
 
-        {/* 이미지 */}
         <Image
           source={require("../../../assets/images/profile.png")}
           className="rounded-full"
@@ -92,8 +90,9 @@ export default function Profile() {
           }}
         />
       </View>
-      {/* 이름 */}
-      <View className="ml-3 flex-1">
+
+      {/* 사용자 이름 & 알림 */}
+      <View className="flex-1 ml-3">
         <View className="flex flex-row justify-between">
           <Text className="text-white text-[24px] font-bold">{name}님</Text>
           <SimpleLineIcons name="bell" size={24} color="white" />

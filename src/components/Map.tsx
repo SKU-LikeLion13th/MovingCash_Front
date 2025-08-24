@@ -92,6 +92,7 @@ export default function Map(): JSX.Element {
     <View className="justify-center items-center bg-[#101010]">
       <MapView
         style={mapStyle}
+        provider="google"
         initialRegion={initialRegion}
         zoomEnabled
         scrollEnabled

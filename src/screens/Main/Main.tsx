@@ -16,10 +16,10 @@ export default function Main() {
         <WeeklyRunning />
       </View>
       <View className="mt-8">
-        <Map />
+        <RecentMoving />
       </View>
       <View className="mt-8">
-        <RecentMoving />
+        <Map />
       </View>
       <View className="mt-8">
         <StartNow />
