@@ -28,9 +28,7 @@ import UsePoint from "src/screens/Point/UsePoint";
 import Map from "src/components/Map";
 import Splash from "src/screens/Member/Splash";
 import Login from "src/screens/Member/Login";
-import Nickname from "src/screens/Member/Nickname";
-import Id from "src/screens/Member/Id";
-import Pw from "src/screens/Member/Pw";
+import Signup from "src/screens/Member/Signup";
 import Start from "src/screens/Member/Start";
 
 import Bar from "src/components/Bar";
@@ -107,9 +105,7 @@ function StartStackScreen() {
       <StartStack.Screen name="Login" component={Login} />
       <StartStack.Screen name="Map" component={Map} />
       <StartStack.Screen name="Splash" component={Splash} />
-      <StartStack.Screen name="Nickname" component={Nickname} />
-      <StartStack.Screen name="Id" component={Id} />
-      <StartStack.Screen name="Pw" component={Pw} />
+      <StartStack.Screen name="Signup" component={Signup} />
       <StartStack.Screen name="Start" component={Start} />
     </StartStack.Navigator>
   );
