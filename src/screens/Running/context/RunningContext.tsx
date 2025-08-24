@@ -171,12 +171,16 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
         return { success: true, message: "세션이 정상적으로 취소되었습니다." };
       }
 
+      // 상태에 따른 movingStatus 결정
+      const movingStatus = statusRef.current === "stop" ? "PAUSE" : "END";
+
       const payload = {
         totalCalories: caloriesRef.current,
         totalDistance: distanceRef.current,
         pace: paceRef.current,
         duration: formatTime(elapsedRef.current),
         points: pointsRef.current,
+        movingStatus: movingStatus,
       };
       console.log("세션 종료 요청:", payload);
 
