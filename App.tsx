@@ -1,12 +1,11 @@
 import React from "react";
 import "react-native-gesture-handler";
-import {
-  NavigationContainer,
-  getFocusedRouteNameFromRoute,
-} from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import Main from "src/screens/Main/Main";
 import Walking from "src/screens/Walking/Walking";
 import Running from "src/screens/Running/Running";
@@ -20,10 +19,12 @@ import Store from "src/screens/Store/Store";
 import ExchangeDetail from "src/screens/Store/CouponDetail/ExchangeDetail";
 import UseCoupon from "src/screens/Store/MyCoupon/UseCoupon";
 import UseCouponDetail from "src/screens/Store/CouponDetail/UseCouponDetail";
+
 import PointMain from "src/screens/Point/PointMain";
-import MyPage from "src/screens/MyPage/MyPage";
 import AvailablePoints from "src/screens/Point/AvailablePoints";
 import UsePoint from "src/screens/Point/UsePoint";
+
+import MyPage from "src/screens/MyPage/MyPage";
 
 import Map from "src/components/Map";
 import RealTimeMap from "src/components/RealTimeMap";
@@ -34,6 +35,7 @@ import Start from "src/screens/Member/Start";
 
 import Bar from "src/components/Bar";
 
+// 타입 정의
 export type RootTabParamList = {
   MainTab: undefined;
   StoreTab: undefined;
@@ -89,15 +91,21 @@ export type MyPageStackParamList = {
   MyPage: undefined;
 };
 
+export type RootStackParamList = {
+  StartStack: undefined;
+  MainTabs: undefined;
+};
+
+// Navigator 생성
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const StartStack = createNativeStackNavigator<StartStackParamList>();
 const MainStack = createNativeStackNavigator<MainStackParamList>();
 const StoreStack = createNativeStackNavigator<StoreStackParamList>();
 const PointStack = createNativeStackNavigator<PointStackParamList>();
 const MyPageStack = createNativeStackNavigator<MyPageStackParamList>();
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
-//만약 보고 싶은 화면이 있는데 넘어가는게 아직 없다?
-//=> 여기 stackScreen안에서 순서 바꾼 다음에 리로드하면 잘 보입니당
+// StartStack
 function StartStackScreen() {
   return (
     <StartStack.Navigator screenOptions={{ headerShown: false }}>
@@ -111,6 +119,7 @@ function StartStackScreen() {
   );
 }
 
+// MainStack
 function MainStackScreen() {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
@@ -128,6 +137,7 @@ function MainStackScreen() {
   );
 }
 
+// StoreStack
 function StoreStackScreen() {
   return (
     <StoreStack.Navigator screenOptions={{ headerShown: false }}>
@@ -139,6 +149,7 @@ function StoreStackScreen() {
   );
 }
 
+// PointStack
 function PointStackScreen() {
   return (
     <PointStack.Navigator screenOptions={{ headerShown: false }}>
@@ -149,6 +160,7 @@ function PointStackScreen() {
   );
 }
 
+// MyPageStack
 function MyPageStackScreen() {
   return (
     <MyPageStack.Navigator screenOptions={{ headerShown: false }}>
@@ -157,53 +169,46 @@ function MyPageStackScreen() {
   );
 }
 
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+// TabNavigator
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      initialRouteName="MainTab"
+      tabBar={(props) => <Bar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tab.Screen name="MainTab" component={MainStackScreen} options={{ title: "메인" }} />
+      <Tab.Screen name="StoreTab" component={StoreStackScreen} options={{ title: "상점" }} />
+      <Tab.Screen name="PointTab" component={PointStackScreen} options={{ title: "포인트" }} />
+      <Tab.Screen name="MyPageTab" component={MyPageStackScreen} options={{ title: "마이페이지" }} />
+    </Tab.Navigator>
+  );
+}
 
+// App
 export default function App() {
-  //폰트 로딩
   const [fontsLoaded] = useFonts({
     NotoBold: require("./assets/fonts/NotoSansKR-Bold.ttf"),
     NotoSemiBold: require("./assets/fonts/NotoSansKR-SemiBold.ttf"),
     NotoMedium: require("./assets/fonts/NotoSansKR-Medium.ttf"),
     NotoRegular: require("./assets/fonts/NotoSansKR-Regular.ttf"),
-
     PoppinsBold: require("./assets/fonts/Poppins-Bold.ttf"),
     PoppinsSemiBold: require("./assets/fonts/Poppins-SemiBold.ttf"),
     PoppinsMedium: require("./assets/fonts/Poppins-Medium.ttf"),
     PoppinsRegular: require("./assets/fonts/Poppins-Regular.ttf"),
   });
 
-  //로딩 화면 (필요없으면 그냥 return null)
   if (!fontsLoaded) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
-        <Tab.Navigator
-          initialRouteName="MainTab"
-          tabBar={(props) => <Bar {...props} />}
-          screenOptions={{ headerShown: false }}>
-          <Tab.Screen
-            name="MainTab"
-            component={MainStackScreen}
-            options={{ title: "메인" }}
-          />
-          <Tab.Screen
-            name="StoreTab"
-            component={StoreStackScreen}
-            options={{ title: "상점" }}
-          />
-          <Tab.Screen
-            name="PointTab"
-            component={PointStackScreen}
-            options={{ title: "포인트" }}
-          />
-          <Tab.Screen
-            name="MyPageTab"
-            component={MyPageStackScreen}
-            options={{ title: "마이페이지" }}
-          />
-        </Tab.Navigator>
+        <RootStack.Navigator screenOptions={{ headerShown: false }}>
+          {/* 앱 시작 시 Splash가 있는 StartStack */}
+          <RootStack.Screen name="StartStack" component={StartStackScreen} />
+          {/* 로그인/회원가입 후 이동하는 메인 탭 */}
+          <RootStack.Screen name="MainTabs" component={MainTabs} />
+        </RootStack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
   );
