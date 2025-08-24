@@ -6,6 +6,8 @@ import {
   Pressable,
   StyleSheet,
   Image,
+  Modal,
+  TextInput,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
@@ -21,6 +23,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "App";
 
 import MapActionButtons from "../../components/MapActionBtn";
+import KeywordOverlay from "../../components/KeywordOverlay";
 
 const BROWSER_KEY = (Constants.expoConfig?.extra as any)
   ?.googleMapsKey as string;
@@ -47,6 +50,9 @@ export default function MovingSpot() {
 
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchLabel, setSearchLabel] = useState<string>("");
+
+  const [keywordOpen, setKeywordOpen] = useState(false);
+  const [customKeyword, setCustomKeyword] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -132,30 +138,36 @@ export default function MovingSpot() {
     },
   ] as const;
 
+  const EMOJI_MAP: Record<"food" | "cafe" | "fun", string> = {
+    food: "🍽️",
+    cafe: "☕",
+    fun: "🎮",
+  };
+
   const QUERY_MAP: Record<"food" | "cafe" | "fun", string> = {
     food: "맛집",
     cafe: "카페",
     fun: "놀거리",
   };
 
-  async function handleCategoryPress(type: "food" | "cafe" | "fun") {
+  async function handleCategoryPress(
+    type: "food" | "cafe" | "fun",
+    queryOverride?: string
+  ) {
     if (!curPos) {
       console.warn("현재 위치 미확인");
       return;
     }
 
-    const label =
-      type === "food"
-        ? "맛집 찾는 중…"
-        : type === "cafe"
-        ? "카페 찾는 중…"
-        : "놀거리 찾는 중…";
+    const query = (queryOverride && queryOverride.trim()) || QUERY_MAP[type];
+
+    const label = `${query} 찾는 중…`;
     setSearchLabel(label);
     setSearchLoading(true);
 
     try {
       const payload = {
-        query: QUERY_MAP[type],
+        query,
         lat: curPos.lat,
         lng: curPos.lng,
         radius: 1000,
@@ -174,7 +186,7 @@ export default function MovingSpot() {
         payload,
         {
           headers: {
-            Authorization: `${token}`,
+            Authorization: `${token}`, // 서버가 Bearer 요구하면 `Bearer ${token}`로 바꿔!
             "Content-Type": "application/json",
           },
           validateStatus: (s) => s === 200,
@@ -204,6 +216,8 @@ export default function MovingSpot() {
             title: String(p.name ?? ""),
             subtitle: String(p.address ?? ""),
             rating,
+            // 커스텀 키워드면 🎯, 아니면 기존 이모지 유지
+            emoji: queryOverride ? "🎯" : EMOJI_MAP[type],
           };
         })
         .filter((m) => Number.isFinite(m.lat) && Number.isFinite(m.lng));
@@ -216,7 +230,6 @@ export default function MovingSpot() {
       setSearchLabel("");
     }
   }
-
   //버튼 두 개 (추천 초기화 / 현재 위치 중앙으로 )
   const resetRecommended = async () => {
     try {
@@ -316,9 +329,14 @@ export default function MovingSpot() {
                 <Pressable
                   key={c.key}
                   className="bg-[#2E2E31] w-[30%] mx-2 p-3 rounded-3xl justify-center"
-                  onPress={() =>
-                    handleCategoryPress(c.key as "food" | "cafe" | "fun")
-                  }
+                  onPress={() => {
+                    if (c.key === "fun") {
+                      setCustomKeyword("");
+                      setKeywordOpen(true);
+                    } else {
+                      handleCategoryPress(c.key as "food" | "cafe");
+                    }
+                  }}
                   disabled={searchLoading}
                   style={{ opacity: searchLoading ? 0.6 : 1 }}
                 >
@@ -352,6 +370,15 @@ export default function MovingSpot() {
           </BottomSheetScrollView>
         </BottomSheet>
       </View>
+      <KeywordOverlay
+        open={keywordOpen}
+        initial={customKeyword}
+        onClose={() => setKeywordOpen(false)}
+        onSubmit={(kw) => {
+          setCustomKeyword(kw);
+          handleCategoryPress("fun", kw);
+        }}
+      />
     </View>
   );
 }

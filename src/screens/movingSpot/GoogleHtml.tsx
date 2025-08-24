@@ -251,6 +251,72 @@ export const makeGoogleHtml = (GOOGLE_KEY: string) => String.raw`
       if (!bounds.isEmpty()) map.fitBounds(bounds);
     }
 
+    function makeBadgeIcon(emoji, rating) {
+      const hasEmoji = !!emoji;
+      const hasRating = String(rating ?? '') !== '';
+      if (!hasEmoji && !hasRating) return null;
+
+      const dpr = (window.devicePixelRatio || 1);
+      const w = 80, h = 40, r = 14;
+      const canvas = document.createElement('canvas');
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      ctx.fillStyle = '#586271';
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(w - r, 0);
+      ctx.quadraticCurveTo(w, 0, w, r);
+      ctx.lineTo(w, h - r);
+      ctx.quadraticCurveTo(w, h, w - r, h);
+      ctx.lineTo(r, h);
+      ctx.quadraticCurveTo(0, h, 0, h - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // 이모지
+      if (hasEmoji) {
+  const circleR = 14;        // 원 반지름 (이모지 크기보다 약간 크게)
+  const circleX = 20;        // 원 중심 X 좌표
+  const circleY = h / 2;     // 원 중심 Y 좌표
+
+  // 원 (#ee665c)
+  ctx.fillStyle = '#ee665c';
+  ctx.beginPath();
+  ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.fill();
+
+  // 이모지 (원 위에)
+  ctx.font = '16px system-ui, Apple Color Emoji, Segoe UI Emoji';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillText(emoji, circleX, circleY + 1); // +1은 세로 보정
+}
+
+      // 평점 (흰색 굵게)
+      if (hasRating) {
+        ctx.font = 'bold 14px system-ui, -apple-system, Segoe UI';
+        ctx.fillStyle = '#fff';
+        const text = String(rating);
+        const metrics = ctx.measureText(text);
+        const tx = w - metrics.width + 2;
+        ctx.fillText(text, tx, h / 2);
+      }
+
+      return {
+        url: canvas.toDataURL('image/png'),
+        size: new google.maps.Size(w, h),
+        scaledSize: new google.maps.Size(w, h),
+        anchor: new google.maps.Point(w / 2, h / 2),
+      };
+    }
+
+
+
     // ===== 검색 결과 마커 =====
     function clearSearchMarkers(){
       searchMarkers.forEach(m => m.setMap(null));
@@ -262,13 +328,16 @@ export const makeGoogleHtml = (GOOGLE_KEY: string) => String.raw`
       clearSearchMarkers();
 
       const safe = (list || [])
-        .map(item => ({
-          lat: Number(item.lat),
-          lng: Number(item.lng),
-          title: item.title || "",
-          subtitle: item.subtitle || "",
-        }))
-        .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+      .map(item => ({
+        lat: Number(item.lat),
+        lng: Number(item.lng),
+        title: item.title || "",
+        subtitle: item.subtitle || "",
+        emoji: item.emoji || "",         
+        rating: String(item.rating || ""), 
+      }))
+    .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+
 
       if (!safe.length) return;
 
@@ -282,42 +351,42 @@ export const makeGoogleHtml = (GOOGLE_KEY: string) => String.raw`
         const count = (seen.get(key) || 0) + 1;
         seen.set(key, count);
 
-        let lat = item.lat;
-        let lng = item.lng;
-        if (count > 1) { // 같은 좌표가 2개 이상이면 살짝 흩뿌리기
-          lat = jitter(lat);
-          lng = jitter(lng);
-        }
+        let lat = item.lat, lng = item.lng;
+        if (count > 1) { lat = jitter(lat); lng = jitter(lng); }
 
         const pos = { lat, lng };
+
+        const badge = makeBadgeIcon(item.emoji, item.rating);
 
         const marker = new google.maps.Marker({
           position: pos,
           map,
           title: item.title,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 15,
-            fillColor: "#586271",
-            fillOpacity: 1,
-          },
-          label: item.emoji ? { text: String(item.emoji) } : undefined,
-          zIndex: 500,
-        });
-
-        if (item.subtitle || item.title) {
-          const iw = new google.maps.InfoWindow({
-            content: '<div style="font-size:12px;line-height:1.4;">' +
-                      (item.title ? ('<b>' + escapeHtml(item.title) + '</b><br/>') : '') +
-                      (item.subtitle ? escapeHtml(item.subtitle) : '') +
-                    '</div>'
-          });
-          marker.addListener('click', () => iw.open({ anchor: marker, map }));
-        }
-
-        searchMarkers.push(marker);
-        bounds.extend(pos);
+          icon: badge || {                                
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 15,
+          fillColor: "#586271",
+          fillOpacity: 1,
+        },
+        zIndex: 500,
       });
+
+      if (item.subtitle || item.title || item.rating) {
+        const iw = new google.maps.InfoWindow({
+        content:
+          '<div style="font-size:12px;line-height:1.4;">' +
+          (item.title ? ('<b>' + escapeHtml(item.title) + '</b><br/>') : '') +
+          (item.subtitle ? escapeHtml(item.subtitle) + '<br/>' : '') +
+          (item.rating ? ('<span>⭐ ' + escapeHtml(String(item.rating)) + '</span>') : '') +
+          '</div>'
+        });
+      marker.addListener('click', () => iw.open({ anchor: marker, map }));
+    }
+
+    searchMarkers.push(marker);
+    bounds.extend(pos);
+  });
+
 
       // 화면 맞추기
       if (fit) {
