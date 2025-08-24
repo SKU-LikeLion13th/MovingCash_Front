@@ -56,7 +56,6 @@ export default function Login() {
         }
 
         await AsyncStorage.setItem("accessToken", `${tokenType} ${token}`);
-        Alert.alert("로그인 성공", "환영합니다!");
         navigation.navigate("Start");
       }
     } catch (error) {
