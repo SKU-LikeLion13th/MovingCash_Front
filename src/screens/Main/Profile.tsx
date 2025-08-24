@@ -29,7 +29,7 @@ export default function Profile() {
           {
             method: "GET",
             headers: {
-              Authorization: `${token}`,
+              Authorization: token,
               "Content-Type": "application/json",
             },
           }

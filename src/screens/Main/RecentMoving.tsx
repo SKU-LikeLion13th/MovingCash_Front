@@ -12,7 +12,7 @@ interface MovingData {
 export default function RecentMoving() {
   const [mode, setMode] = useState<"Running" | "Walking">("Running");
   const [open, setOpen] = useState(false);
-  const [data, setData] = useState({ calories: 0, distance: 0 });
+  const [data, setData] = useState<MovingData>({ calories: 0, distance: 0 });
   const [name, setName] = useState("User");
 
   useEffect(() => {
@@ -43,17 +43,20 @@ export default function RecentMoving() {
         const startDate = toLocalDateTimeString(monday);
         const endDate = toLocalDateTimeString(sunday);
 
+        // mode → 백엔드 status 값 변환
+        const status = mode === "Running" ? "RUNNING" : "WALKING";
+
         const response = await axios.post(
           "http://movingcash.sku-sku.com/mainPage",
           {
-            status: "RUNNING",
+            status,
             startDate,
             endDate,
             todayDate: todayStr,
           },
           {
             headers: {
-              Authorization: `${token}`,
+              Authorization: token,
               "Content-Type": "application/json",
             },
           }
@@ -71,7 +74,7 @@ export default function RecentMoving() {
     };
 
     fetchData();
-  }, []);
+  }, [mode]);
 
   return (
     <View className="relative">
@@ -80,7 +83,6 @@ export default function RecentMoving() {
           {name}님의 최근 무빙
         </Text>
 
-        {/* 드롭다운 버튼 */}
         <View>
           <TouchableOpacity
             className="flex flex-row items-center"
