@@ -39,7 +39,7 @@ import Bar from "src/components/Bar";
 export type RootTabParamList = {
   MainTab: undefined;
   StoreTab: undefined;
-  PointTab: undefined;
+  PointTab: { screen: keyof PointStackParamList } | undefined;
   MyPageTab: undefined;
 };
 
@@ -177,10 +177,26 @@ function MainTabs() {
       tabBar={(props) => <Bar {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tab.Screen name="MainTab" component={MainStackScreen} options={{ title: "메인" }} />
-      <Tab.Screen name="StoreTab" component={StoreStackScreen} options={{ title: "상점" }} />
-      <Tab.Screen name="PointTab" component={PointStackScreen} options={{ title: "포인트" }} />
-      <Tab.Screen name="MyPageTab" component={MyPageStackScreen} options={{ title: "마이페이지" }} />
+      <Tab.Screen
+        name="MainTab"
+        component={MainStackScreen}
+        options={{ title: "메인" }}
+      />
+      <Tab.Screen
+        name="StoreTab"
+        component={StoreStackScreen}
+        options={{ title: "상점" }}
+      />
+      <Tab.Screen
+        name="PointTab"
+        component={PointStackScreen}
+        options={{ title: "포인트" }}
+      />
+      <Tab.Screen
+        name="MyPageTab"
+        component={MyPageStackScreen}
+        options={{ title: "마이페이지" }}
+      />
     </Tab.Navigator>
   );
 }

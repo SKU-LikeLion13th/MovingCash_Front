@@ -13,7 +13,15 @@ import Feather from "@expo/vector-icons/Feather";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { MainStackParamList } from "App";
+import { CompositeNavigationProp } from "@react-navigation/native";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { RootTabParamList, MainStackParamList } from "App";
+import axios from "axios";
+
+type PointTabNavProp = CompositeNavigationProp<
+  BottomTabNavigationProp<RootTabParamList, "PointTab">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
@@ -25,7 +33,8 @@ export default function AvailablePoints() {
     point: string;
   } | null>(null);
 
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation<PointTabNavProp>();
+
   const isFocused = useIsFocused();
   const [visitedSpot, setVisitedSpot] = useState(false);
 
@@ -108,14 +117,32 @@ export default function AvailablePoints() {
   const handleMissionPress = async (mission: any) => {
     if (mission.key === "movingSpot") {
       if (mission.btnType === "participate") {
-        // 참여하기 → 이동 & 방문 기록 저장
         await AsyncStorage.setItem("visitedMovingSpot", "true");
+
+        // MainStack의 MovingSpot으로 바로 이동
         navigation.navigate("MovingSpot");
       } else if (mission.btnType === "getPoint") {
-        // 포인트받기 → 팝업 오픈
-        setPopupData({ title: mission.title, point: mission.point });
-        setShowPopup(true);
-        // 여기서 서버에 포인트 지급 API 호출 가능
+        try {
+          const token = await AsyncStorage.getItem("accessToken");
+          const pointsToAdd = parseInt(mission.point.replace(/[^0-9]/g, ""));
+          const response = await axios.post(
+            "http://movingcash.sku-sku.com/addPoints",
+            {
+              points: pointsToAdd,
+            },
+            { headers: { Authorization: token } }
+          );
+
+          if (response.status === 200) {
+            // 성공적으로 포인트가 추가되면 팝업 표시
+            setPopupData({ title: mission.title, point: mission.point });
+            setShowPopup(true);
+          } else {
+            console.log("포인트 추가 실패:", response.data);
+          }
+        } catch (error) {
+          console.error("포인트 추가 중 오류 발생:", error);
+        }
       }
     } else {
       console.log("엥:", mission.key);
@@ -248,7 +275,10 @@ export default function AvailablePoints() {
               )}
               <TouchableOpacity
                 className="flex-row items-center"
-                onPress={() => setShowPopup(false)}
+                onPress={() => {
+                  setShowPopup(false);
+                  navigation.navigate("PointTab", { screen: "PointMain" });
+                }}
               >
                 <Text className="text-[#D4D4D4] text-[16px] mr-1">
                   확인하러 가기

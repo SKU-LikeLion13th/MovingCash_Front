@@ -50,7 +50,9 @@ export default function RecentMoving() {
       const response = await axios.post(
         "http://movingcash.sku-sku.com/mainPage",
         { status, startDate, endDate, todayDate: todayStr },
-        { headers: { Authorization: token, "Content-Type": "application/json" } }
+        {
+          headers: { Authorization: token, "Content-Type": "application/json" },
+        }
       );
 
       const resData = response.data;
