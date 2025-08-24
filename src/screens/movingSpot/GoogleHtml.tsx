@@ -151,43 +151,91 @@ export const makeGoogleHtml = (GOOGLE_KEY: string) => String.raw`
       }
     }
 
-    // ===== 경로용 POIs (S / 1..n / D) =====
     function clearPOIs(){
-      poiMarkers.forEach(m => m.setMap(null));
-      poiMarkers = [];
-    }
+  poiMarkers.forEach(m => m.setMap(null));
+  poiMarkers = [];
+}
+
+    // ===== 경로용 POIs (S / 1..n / D) =====
     function drawPOIs(origin, destination, waypoints){
-      if (!isReady || !window.google || !map) return;
-      clearPOIs();
-      try{
-        // Start
-        poiMarkers.push(new google.maps.Marker({
-          position: { lat: Number(origin.lat), lng: Number(origin.lng) },
-          map,
-          icon: ICON(GREEN_ROUTE, 11),
-          label: { text: "S", color: "#FFFFFF", fontWeight: "700" },
-          title: origin.name || "출발지",
-        }));
-        // Waypoints
-        (waypoints || []).forEach((w, i) => {
-          poiMarkers.push(new google.maps.Marker({
-            position: { lat: Number(w.lat), lng: Number(w.lng) },
-            map,
-            icon: ICON(GREEN_ROUTE, 10),
-            label: { text: String(i+1), color: "#FFFFFF", fontWeight: "700" },
-            title: w.name || ("경유지 " + (i+1)),
-          }));
-        });
-        // Destination
-        poiMarkers.push(new google.maps.Marker({
-          position: { lat: Number(destination.lat), lng: Number(destination.lng) },
-          map,
-          icon: ICON(GREEN_ROUTE, 11),
-          label: { text: "D", color: "#FFFFFF", fontWeight: "700" },
-          title: destination.name || "도착지",
-        }));
-      }catch(e){}
+  if (!isReady || !window.google || !map) return;
+  clearPOIs();
+  try{
+    // Start
+    const startMarker = new google.maps.Marker({
+      position: { lat: Number(origin.lat), lng: Number(origin.lng) },
+      map,
+      icon: ICON(GREEN_ROUTE, 11),
+      label: { text: "S", color: "#FFFFFF", fontWeight: "700" },
+      title: origin.name || "출발지",
+    });
+    poiMarkers.push(startMarker);
+
+    if (origin.name || origin.subtitle) {
+      const iw = new google.maps.InfoWindow({
+        content:
+          '<div style="font-size:12px;line-height:1.4;">' +
+            '<b>' + escapeHtml(origin.name || "출발지") + '</b><br/>' +
+            (origin.subtitle ? escapeHtml(origin.subtitle) : '') +
+          '</div>'
+      });
+      startMarker.addListener("click", function() {
+        iw.open({ anchor: startMarker, map });
+      });
     }
+
+    // Waypoints
+    (waypoints || []).forEach(function(w, i){
+      const wpMarker = new google.maps.Marker({
+        position: { lat: Number(w.lat), lng: Number(w.lng) },
+        map,
+        icon: ICON(GREEN_ROUTE, 10),
+        label: { text: String(i+1), color: "#FFFFFF", fontWeight: "700" },
+        title: w.name || ("경유지 " + (i+1)),
+      });
+      poiMarkers.push(wpMarker);
+
+      if (w.name || w.subtitle) {
+        const iw = new google.maps.InfoWindow({
+          content:
+            '<div style="font-size:12px;line-height:1.4;">' +
+              '<b>' + escapeHtml(w.name || ("경유지 " + (i+1))) + '</b><br/>' +
+              (w.subtitle ? escapeHtml(w.subtitle) : '') +
+            '</div>'
+        });
+        wpMarker.addListener("click", function() {
+          iw.open({ anchor: wpMarker, map });
+        });
+      }
+    });
+
+    // Destination
+    const endMarker = new google.maps.Marker({
+      position: { lat: Number(destination.lat), lng: Number(destination.lng) },
+      map,
+      icon: ICON(GREEN_ROUTE, 11),
+      label: { text: "D", color: "#FFFFFF", fontWeight: "700" },
+      title: destination.name || "도착지",
+    });
+    poiMarkers.push(endMarker);
+
+    if (destination.name || destination.subtitle) {
+      const iw = new google.maps.InfoWindow({
+        content:
+          '<div style="font-size:13px;line-height:1.4;">' +
+            '<b>' + escapeHtml(destination.name || "도착지") + '</b><br/>' +
+            (destination.subtitle ? escapeHtml(destination.subtitle) : '') +
+          '</div>'
+      });
+      endMarker.addListener("click", function() {
+        iw.open({ anchor: endMarker, map });
+      });
+    }
+
+  }catch(e){
+    post({ type: "ERROR", msg: "DRAW_POIS failed: " + (e?.message || String(e)) });
+  }
+}
 
     // ===== 경로 라인 =====
     function clearRoutes(){
