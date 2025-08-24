@@ -503,7 +503,10 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
           lng: loc.lng,
           step: stepsRef.current,
           pointIndex: pointIndexRef.current,
-          timestamp: new Date().toISOString(),
+          timestamp:
+            new Date()
+              .toLocaleString("sv-SE", { timeZone: "Asia/Seoul" })
+              .replace(" ", "T") + "+09:00",
           durationStr: formatTime(elapsedRef.current), // <<< 실시간 계산
         };
         try {

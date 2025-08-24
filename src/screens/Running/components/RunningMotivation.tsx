@@ -70,7 +70,7 @@ export default function RunningMotivation({ status }: RunningMotivationProps) {
 
   return (
     <View>
-      <Text className="text-center text-xl text-white font-notoBold mt-4">
+      <Text className="text-center text-lg text-white font-notoBold mt-4">
         {message}
       </Text>
     </View>

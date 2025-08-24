@@ -7,7 +7,7 @@ export default function WalkingDetail() {
   const { elapsed, distance, pace, calories } = useWalking();
 
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["4%", "30%"], []);
+  const snapPoints = useMemo(() => ["4%", "31%"], []);
 
   const displayTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -33,13 +33,13 @@ export default function WalkingDetail() {
           paddingTop: 15,
           paddingBottom: 20,
         }}>
-        <View className="justify-center">
+        <View className="justify-center pt-1.5">
           {/* 거리 */}
           <View className="mb-7">
-            <Text className="text-[#7C7C7C] mb-2 font-notoBold text-base">
+            <Text className="text-[#7C7C7C] mb-2 font-notoBold text-base leading-none">
               거리
             </Text>
-            <Text className="text-black text-5xl font-poppinsSemiBold">
+            <Text className="text-black text-4xl font-poppinsSemiBold">
               {distance.toFixed(1)}km
             </Text>
           </View>
@@ -50,7 +50,7 @@ export default function WalkingDetail() {
               <Text className="text-gray-500 text-sm mb-1.5 font-notoRegular">
                 페이스
               </Text>
-              <Text className="text-orange-500 text-xl font-poppinsSemiBold">
+              <Text className="text-orange-500 text-lg font-poppinsSemiBold">
                 {pace.toFixed(1)} km/h
               </Text>
             </View>
@@ -59,7 +59,7 @@ export default function WalkingDetail() {
               <Text className="text-gray-500 text-sm mb-1.5 font-notoRegular">
                 시간
               </Text>
-              <Text className="text-orange-500 text-xl font-poppinsSemiBold">
+              <Text className="text-orange-500 text-lg font-poppinsSemiBold">
                 {displayTime(elapsed)}
               </Text>
             </View>
@@ -68,7 +68,7 @@ export default function WalkingDetail() {
               <Text className="text-gray-500 text-sm mb-1.5 font-notoRegular">
                 칼로리
               </Text>
-              <Text className="text-orange-500 text-xl font-poppinsSemiBold">
+              <Text className="text-orange-500 text-lg font-poppinsSemiBold">
                 {Math.round(calories)} kcal
               </Text>
             </View>

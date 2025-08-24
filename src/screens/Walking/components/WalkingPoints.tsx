@@ -78,7 +78,7 @@ export default function WalkingPoints() {
       </View>
 
       {/* 오늘의 러닝 적립 포인트 */}
-      <View className="flex-row items-center justify-center mt-1">
+      <View className="flex-row items-center justify-center mt-2">
         <Text className="text-white font-notoSemiBold text-[13px]">
           오늘의 워킹 적립 포인트
         </Text>
