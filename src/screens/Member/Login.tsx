@@ -177,7 +177,7 @@ export default function Login() {
               비밀번호 찾기
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("Nickname")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
             <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white" }}>
               회원가입
             </Text>
