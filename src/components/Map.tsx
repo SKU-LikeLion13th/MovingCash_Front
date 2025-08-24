@@ -33,11 +33,26 @@ export default function Map(): JSX.Element {
     if (!currentLocation) return;
 
     const exampleRoute: LatLng[] = [
-      { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
-      { latitude: currentLocation.latitude + 0.0005, longitude: currentLocation.longitude + 0.0005 },
-      { latitude: currentLocation.latitude + 0.0010, longitude: currentLocation.longitude + 0.0010 },
-      { latitude: currentLocation.latitude + 0.0015, longitude: currentLocation.longitude + 0.0015 },
-      { latitude: currentLocation.latitude + 0.0020, longitude: currentLocation.longitude + 0.0020 },
+      {
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+      },
+      {
+        latitude: currentLocation.latitude + 0.0005,
+        longitude: currentLocation.longitude + 0.0005,
+      },
+      {
+        latitude: currentLocation.latitude + 0.001,
+        longitude: currentLocation.longitude + 0.001,
+      },
+      {
+        latitude: currentLocation.latitude + 0.0015,
+        longitude: currentLocation.longitude + 0.0015,
+      },
+      {
+        latitude: currentLocation.latitude + 0.002,
+        longitude: currentLocation.longitude + 0.002,
+      },
     ];
 
     let index = 1; // 첫 좌표는 이미 routeCoordinates에 있음
@@ -74,7 +89,7 @@ export default function Map(): JSX.Element {
   };
 
   return (
-    <View className="flex-1 justify-center items-center bg-[#101010]">
+    <View className="justify-center items-center bg-[#101010]">
       <MapView
         style={mapStyle}
         provider="google"

@@ -128,7 +128,7 @@ export default function RecentMoving() {
           <View className="ml-2">
             <Text className="text-[#E9690D] text-[12px]">Total Calories</Text>
             <Text className="text-white text-[22px] font-bold">
-              {data.calories} kcal
+              {Math.floor(data.calories)} kcal
             </Text>
           </View>
         </View>
@@ -145,7 +145,7 @@ export default function RecentMoving() {
           <View className="ml-2">
             <Text className="text-[#E9690D] text-[12px]">Total Distance</Text>
             <Text className="text-white text-[22px] font-bold">
-              {data.distance} km
+              {Math.floor(data.distance)} km
             </Text>
           </View>
         </View>
