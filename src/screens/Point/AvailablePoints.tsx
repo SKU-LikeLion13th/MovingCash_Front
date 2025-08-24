@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,29 +10,44 @@ import {
 import Header from "src/components/Header";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { MainStackParamList } from "App";
+
+type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
 export default function AvailablePoints() {
   const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
-  const handleGetPoint = (message: string) => {
-    setPopupMessage(message);
-    setShowPopup(true);
-  };
 
   const [popupData, setPopupData] = useState<{
     title: string;
     point: string;
   } | null>(null);
 
+  const navigation = useNavigation<NavigationProp>();
+  const isFocused = useIsFocused();
+  const [visitedSpot, setVisitedSpot] = useState(false);
+
+  useEffect(() => {
+    if (isFocused) {
+      AsyncStorage.getItem("visitedMovingSpot").then((value) => {
+        if (value === "true") setVisitedSpot(true);
+      });
+    }
+  }, [isFocused]);
+
   const missions = [
     {
+      key: "movingSpot",
       title: "Moving 스팟 둘러보고",
       point: "바로 30P 받기",
-      btnText: "포인트 받기",
-      btnType: "getPoint",
+      btnText: visitedSpot ? "포인트 받기" : "참여하기",
+      btnType: visitedSpot ? "getPoint" : "participate",
       image: require("../../../assets/images/AvailablePoints/explore_spot.png"),
     },
     {
+      key: "watchAd",
       title: "Moving 광고 시청하고",
       point: "바로 50P 받기",
       btnText: "참여하기",
@@ -40,13 +55,15 @@ export default function AvailablePoints() {
       image: require("../../../assets/images/AvailablePoints/watch_ad.png"),
     },
     {
+      key: "inviteFriend",
       title: "Moving 친구 한 명 초대하고",
       point: "바로 100P 받기",
-      btnText: "참여완료",
-      btnType: "done",
+      btnText: "참여하기",
+      btnType: "participate",
       image: require("../../../assets/images/AvailablePoints/invite_friend.png"),
     },
     {
+      key: "localStore",
       title: "Moving에서 지역 상점 이용하고",
       point: "바로 200P 받기",
       btnText: "참여하기",
@@ -54,6 +71,7 @@ export default function AvailablePoints() {
       image: require("../../../assets/images/AvailablePoints/local_store.png"),
     },
     {
+      key: "membership",
       title: "Moving에서 회원권 등록하고",
       point: "바로 250P 받기",
       btnText: "참여히기",
@@ -61,6 +79,7 @@ export default function AvailablePoints() {
       image: require("../../../assets/images/AvailablePoints/membership.png"),
     },
     {
+      key: "challenge",
       title: "Moving 챌린지 도전하고",
       point: "바로 300P 받기",
       btnText: "참여하기",
@@ -83,6 +102,23 @@ export default function AvailablePoints() {
       case "getPoint":
       default:
         return { backgroundColor: "#E9690D", color: "#ffffff" };
+    }
+  };
+
+  const handleMissionPress = async (mission: any) => {
+    if (mission.key === "movingSpot") {
+      if (mission.btnType === "participate") {
+        // 참여하기 → 이동 & 방문 기록 저장
+        await AsyncStorage.setItem("visitedMovingSpot", "true");
+        navigation.navigate("MovingSpot");
+      } else if (mission.btnType === "getPoint") {
+        // 포인트받기 → 팝업 오픈
+        setPopupData({ title: mission.title, point: mission.point });
+        setShowPopup(true);
+        // 여기서 서버에 포인트 지급 API 호출 가능
+      }
+    } else {
+      console.log("엥:", mission.key);
     }
   };
 
@@ -115,9 +151,24 @@ export default function AvailablePoints() {
       <View className="flex-1 items-center">
         <ScrollView className="space-y-5 mt-8 flex-1 pt-5 mb-8 bg-[#f9f9f9] rounded-2xl w-[95%]">
           {missions.map((mission, index) => {
-            const btnStyle = getButtonStyle(mission.btnType);
+            const btnType =
+              mission.key === "movingSpot"
+                ? visitedSpot
+                  ? "getPoint"
+                  : "participate"
+                : mission.btnType;
+
+            const btnText =
+              mission.key === "movingSpot"
+                ? visitedSpot
+                  ? "포인트 받기"
+                  : "참여하기"
+                : mission.btnText;
+
+            const btnStyle = getButtonStyle(btnType);
+
             return (
-              <View key={index} className="">
+              <View key={mission.key}>
                 <View className="pl-6 pr-7 pb-4 rounded-xl flex-row items-center justify-between bg-[#f9f9f9]">
                   <View>
                     <Text className="text-[#999999] text-[14px] mb-2">
@@ -129,15 +180,9 @@ export default function AvailablePoints() {
                       </Text>
                       <TouchableOpacity
                         className="rounded-full px-2 py-1 ml-3"
-                        onPress={() => {
-                          if (mission.btnType === "getPoint") {
-                            setPopupData({
-                              title: mission.title,
-                              point: mission.point,
-                            });
-                            setShowPopup(true);
-                          }
-                        }}
+                        onPress={() =>
+                          handleMissionPress({ ...mission, btnType })
+                        }
                         style={{
                           backgroundColor: btnStyle.backgroundColor,
                           borderWidth: btnStyle.borderWidth,
@@ -148,7 +193,7 @@ export default function AvailablePoints() {
                           className="text-[10px] font-semibold"
                           style={{ color: btnStyle.color }}
                         >
-                          {mission.btnText}
+                          {btnText}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -159,8 +204,6 @@ export default function AvailablePoints() {
                     resizeMode="contain"
                   />
                 </View>
-
-                {/* 마지막 미션이 아니면 구분선 */}
                 {index !== missions.length - 1 && (
                   <View className="h-px bg-[#E0E0E0]" />
                 )}
