@@ -2,10 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import Header from "../../components/Header";
 import { useNavigation } from "@react-navigation/native";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { RootTabParamList } from "../../../App"; // App.tsx에서 타입 import
 import axios from "axios";
 
+type NavigationProp = BottomTabNavigationProp<RootTabParamList>;
+
 export default function Signup() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
   // 닉네임, 아이디, 비밀번호 상태
   const [nickname, setNickname] = useState("");
@@ -39,11 +43,14 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://movingcash.sku-sku.com/auth/signup", {
-        name: nickname,
-        userId: id,
-        password: password,
-      });
+      const response = await axios.post(
+        "http://movingcash.sku-sku.com/auth/signup",
+        {
+          name: nickname,
+          userId: id,
+          password: password,
+        }
+      );
 
       if (response.status === 200 || response.status === 201) {
         Alert.alert("회원가입 성공!", "로그인 화면으로 이동합니다.", [
@@ -64,7 +71,6 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
-
 
   return (
     <View className="h-full bg-[#101010]">
@@ -141,7 +147,9 @@ export default function Signup() {
               returnKeyType="done"
               onSubmitEditing={handleSignup}
               className={`w-full px-3 py-2.5 text-[#FFFFFF] rounded-md mb-2 bg-[#101010] ${
-                passwordConfirm ? "border border-[#FFFFFF]" : "border border-[#818181]"
+                passwordConfirm
+                  ? "border border-[#FFFFFF]"
+                  : "border border-[#818181]"
               }`}
             />
 
@@ -166,15 +174,13 @@ export default function Signup() {
               : "bg-[#222222]"
           }`}
           disabled={!nickname || !id || !isCheckedPw || isLoading}
-          onPress={handleSignup}
-        >
+          onPress={handleSignup}>
           <Text
             className={`font-bold ${
               nickname && id && isCheckedPw && !isLoading
                 ? "text-white"
                 : "text-[#A1A1A1]"
-            }`}
-          >
+            }`}>
             {isLoading ? "처리중..." : "회원가입"}
           </Text>
         </TouchableOpacity>

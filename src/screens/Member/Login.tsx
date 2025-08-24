@@ -12,12 +12,21 @@ import {
 import Header from "../../components/Header";
 import { Switch } from "react-native-switch";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { CompositeNavigationProp } from "@react-navigation/native";
+import { StartStackParamList, RootTabParamList } from "../../../App";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+type LoginNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<StartStackParamList, "Login">,
+  BottomTabNavigationProp<RootTabParamList>
+>;
+
 export default function Login() {
   const [isEnabled, setIsEnabled] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<LoginNavigationProp>();
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +57,7 @@ export default function Login() {
 
         await AsyncStorage.setItem("accessToken", `${tokenType} ${token}`);
         Alert.alert("로그인 성공", "환영합니다!");
-        navigation.navigate("MainTab", { screen: "Main" });
+        navigation.navigate("Start");
       }
     } catch (error) {
       console.error("로그인 실패:", error);
@@ -68,8 +77,7 @@ export default function Login() {
             fontSize: 22,
             fontWeight: "bold",
             marginBottom: 24,
-          }}
-        >
+          }}>
           로그인
         </Text>
 
@@ -119,8 +127,7 @@ export default function Login() {
             alignItems: "center",
             justifyContent: "flex-end",
             marginBottom: 20,
-          }}
-        >
+          }}>
           <Text style={{ color: "#FFFFFF", fontSize: 11, marginRight: 8 }}>
             로그인 상태유지
           </Text>
@@ -166,14 +173,25 @@ export default function Login() {
         </TouchableOpacity>
 
         {/* 회원 관련 */}
-        <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 40 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginBottom: 40,
+          }}>
           <TouchableOpacity>
             <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white" }}>
               로그인
             </Text>
           </TouchableOpacity>
           <TouchableOpacity>
-            <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white", marginHorizontal: 36 }}>
+            <Text
+              style={{
+                fontSize: 10.5,
+                fontWeight: "500",
+                color: "white",
+                marginHorizontal: 36,
+              }}>
               비밀번호 찾기
             </Text>
           </TouchableOpacity>
@@ -185,15 +203,24 @@ export default function Login() {
         </View>
 
         {/* OR 구분선 */}
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 36 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 36,
+          }}>
           <View style={{ flex: 1, height: 0.5, backgroundColor: "white" }} />
-          <Text style={{ marginHorizontal: 24, color: "white", fontSize: 12 }}>OR</Text>
+          <Text style={{ marginHorizontal: 24, color: "white", fontSize: 12 }}>
+            OR
+          </Text>
           <View style={{ flex: 1, height: 0.5, backgroundColor: "white" }} />
         </View>
 
         {/* SNS 로그인 */}
         <View style={{ alignItems: "center", marginBottom: 20 }}>
-          <Text style={{ color: "white", fontSize: 12 }}>SNS 계정으로 로그인</Text>
+          <Text style={{ color: "white", fontSize: 12 }}>
+            SNS 계정으로 로그인
+          </Text>
         </View>
 
         <View style={{ flexDirection: "row", justifyContent: "center" }}>

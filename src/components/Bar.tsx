@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { SvgProps } from "react-native-svg";
 import React from "react";
@@ -9,33 +9,28 @@ import StoreIcon from "../../assets/icons/shopBtn.svg";
 import HomeIcon from "../../assets/icons/mainBtn.svg";
 import UserIcon from "../../assets/icons/mypageBtn.svg";
 
-const tabConfig: Record<
-  keyof RootTabParamList,
-  {
-    label: string;
-    Icon: React.FC<SvgProps & { fill?: string; stroke?: string }>;
-    type: "fill" | "stroke";
-  }
-> = {
-  MainTab: { label: "메인", Icon: HomeIcon, type: "fill" },
-  StoreTab: { label: "상점", Icon: StoreIcon, type: "fill" },
-  PointTab: { label: "포인트", Icon: PointIcon, type: "stroke" },
-  MyPageTab: { label: "마이페이지", Icon: UserIcon, type: "stroke" },
-  StartTab: { label: "시작", Icon: HomeIcon, type: "fill" },
+type TabCfg = {
+  label: string;
+  Icon: React.FC<SvgProps & { fill?: string; stroke?: string }>;
+  type: "fill" | "stroke";
+  variant?: "main" | "default";
+};
+
+const tabConfig: Record<keyof RootTabParamList, TabCfg> = {
+  MainTab:  { label: "메인",    Icon: HomeIcon,  type: "fill",   variant: "main" },
+  StoreTab: { label: "상점",    Icon: StoreIcon, type: "fill" },
+  PointTab: { label: "포인트",  Icon: PointIcon, type: "stroke" },
+  MyPageTab:{ label: "마이페이지", Icon: UserIcon, type: "stroke" },
 };
 
 export default function Bar({ state, navigation }: BottomTabBarProps) {
   return (
-    <View style={styles.container}>
+    <View className="flex-row justify-around py-5 pb-8 bg-[#101010]">
       {state.routes.map((route, index) => {
         const cfg = tabConfig[route.name as keyof RootTabParamList];
+        if (!cfg) return null;
 
-        if (!cfg) {
-          console.warn(`tabConfig에 ${route.name} 키가 없어요`);
-          return null;
-        }
-
-        const { Icon, label, type } = cfg;
+        const { Icon, label, type, variant } = cfg;
         const isFocused = state.index === index;
 
         const onPress = () => {
@@ -51,19 +46,41 @@ export default function Bar({ state, navigation }: BottomTabBarProps) {
 
         const color = isFocused ? "#E9690D" : "#999999";
 
+        // 메인 전용 (둥근 FAB + 떠있는 효과)
+        if (variant === "main") {
+          return (
+            <TouchableOpacity
+              key={route.key}
+              onPress={onPress}
+              className="flex-1 items-center -mt-2"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <View
+                className={`w-20 h-14 rounded-2xl bg-[#261910] items-center justify-center shadow-lg 
+                }`}
+              >
+                <Icon width={28} height={28} fill={color} />
+              </View>
+            </TouchableOpacity>
+          ); 
+        }
+
+        // 기본 탭
         return (
           <TouchableOpacity
             key={route.key}
             onPress={onPress}
-            style={styles.tabButton}
+            className="flex-1 items-center"
           >
-            <View style={styles.iconContainer}>
+            <View className="items-center w-[60px]">
               {type === "stroke" ? (
                 <Icon stroke={color} fill="none" />
               ) : (
                 <Icon fill={color} />
               )}
-              <Text style={{ color, fontSize: 12, marginTop: 3 }}>{label}</Text>
+              <Text className="mt-[3px] text-[12px]" style={{ color }}>
+                {label}
+              </Text>
             </View>
           </TouchableOpacity>
         );
@@ -71,15 +88,3 @@ export default function Bar({ state, navigation }: BottomTabBarProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 20,
-    paddingBottom: 30,
-    backgroundColor: "#101010",
-  },
-  tabButton: { flex: 1, alignItems: "center" },
-  iconContainer: { alignItems: "center", width: 60 },
-});
