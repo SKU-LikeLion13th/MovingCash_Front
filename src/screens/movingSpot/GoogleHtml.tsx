@@ -61,7 +61,7 @@ export const makeGoogleHtml = (GOOGLE_KEY: string) => String.raw`
       };
     };
 
-    // ===== Map Init =====
+    // map 기본 설정
     function initMap(){
       const MAP_STYLE = [
         { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
@@ -219,7 +219,7 @@ export const makeGoogleHtml = (GOOGLE_KEY: string) => String.raw`
       if (!bounds.isEmpty()) map.fitBounds(bounds);
     }
 
-    // 🔁 폴백: 출발→경유→도착 직선
+    //폴백: 출발→경유→도착 직선
     function drawStraightRoute(points){
       if(!Array.isArray(points) || points.length < 2) return;
       if (!isReady || !window.google || !map) return;

@@ -18,7 +18,10 @@ import type { MainStackParamList } from "App";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const GOOGLE_KEY = (Constants.expoConfig?.extra as any)?.googleMapsKey as string;
+import MapActionButtons from "../../components/MapActionBtn";
+
+const GOOGLE_KEY = (Constants.expoConfig?.extra as any)
+  ?.googleMapsKey as string;
 const TMAP_APP_KEY = (Constants.expoConfig?.extra as any)?.tmapKey as string;
 const BASE_URL = "http://localhost:8081";
 const COURSES_URL = "http://movingcash.sku-sku.com/movingspot/courses";
@@ -31,13 +34,21 @@ export default function MovingSpotResult() {
   const watcherRef = useRef<Location.LocationSubscription | null>(null);
 
   const [mapReady, setMapReady] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<{ distance?: number; time?: number }>({});
+  const [routeInfo, setRouteInfo] = useState<{
+    distance?: number;
+    time?: number;
+  }>({});
   const [loading, setLoading] = useState(true);
-  const [curPos, setCurPos] = useState<{ lat: number; lng: number; acc?: number } | null>(null);
+  const [curPos, setCurPos] = useState<{
+    lat: number;
+    lng: number;
+    acc?: number;
+  } | null>(null);
   const [started, setStarted] = useState(false);
 
   const fetchedOnceRef = useRef(false);
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { params } = useRoute<R>();
 
   const googleHtml = useMemo(() => makeGoogleHtml(GOOGLE_KEY), [GOOGLE_KEY]);
@@ -50,18 +61,34 @@ export default function MovingSpotResult() {
     return Number(obj?.lng ?? obj?.longitude);
   }
   function toLatLng(p: any): LatLng {
-    return { lat: pickLat(p), lng: pickLng(p), name: p?.name ? String(p.name) : undefined };
+    return {
+      lat: pickLat(p),
+      lng: pickLng(p),
+      name: p?.name ? String(p.name) : undefined,
+    };
   }
 
-  async function fetchTmapPedestrianRoute(origin: LatLng, destination: LatLng, waypoints: LatLng[]) {
-    const url = "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&format=json";
-    const passList = (waypoints || []).slice(0, 5).map((w) => `${w.lng},${w.lat}`).join("_");
+  async function fetchTmapPedestrianRoute(
+    origin: LatLng,
+    destination: LatLng,
+    waypoints: LatLng[]
+  ) {
+    const url =
+      "https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&format=json";
+    const passList = (waypoints || [])
+      .slice(0, 5)
+      .map((w) => `${w.lng},${w.lat}`)
+      .join("_");
 
     const body: any = {
-      startX: origin.lng, startY: origin.lat,
-      endX: destination.lng, endY: destination.lat,
-      reqCoordType: "WGS84GEO", resCoordType: "WGS84GEO",
-      startName: origin.name || "START", endName: destination.name || "END",
+      startX: origin.lng,
+      startY: origin.lat,
+      endX: destination.lng,
+      endY: destination.lat,
+      reqCoordType: "WGS84GEO",
+      resCoordType: "WGS84GEO",
+      startName: origin.name || "START",
+      endName: destination.name || "END",
     };
     if (passList.length) body.passList = passList;
 
@@ -75,19 +102,25 @@ export default function MovingSpotResult() {
     const data = await res.json();
     const features = data?.features || [];
     const latlngs: { lat: number; lng: number }[] = [];
-    let totalDistance = 0, totalTime = 0;
+    let totalDistance = 0,
+      totalTime = 0;
 
     for (const f of features) {
-      if (f?.properties?.totalDistance != null) totalDistance = f.properties.totalDistance;
+      if (f?.properties?.totalDistance != null)
+        totalDistance = f.properties.totalDistance;
       if (f?.properties?.totalTime != null) totalTime = f.properties.totalTime;
       const g = f?.geometry;
       if (!g) continue;
 
       if (g.type === "LineString") {
-        g.coordinates.forEach((c: number[]) => { if (c?.length >= 2) latlngs.push({ lat: c[1], lng: c[0] }); });
+        g.coordinates.forEach((c: number[]) => {
+          if (c?.length >= 2) latlngs.push({ lat: c[1], lng: c[0] });
+        });
       } else if (g.type === "MultiLineString") {
         g.coordinates.forEach((line: number[][]) => {
-          line.forEach((c: number[]) => { if (c?.length >= 2) latlngs.push({ lat: c[1], lng: c[0] }); });
+          line.forEach((c: number[]) => {
+            if (c?.length >= 2) latlngs.push({ lat: c[1], lng: c[0] });
+          });
         });
       }
     }
@@ -101,21 +134,51 @@ export default function MovingSpotResult() {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") { setLoading(false); return; }
-        const cur = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        if (status !== "granted") {
+          setLoading(false);
+          return;
+        }
+        const cur = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
         if (!mounted) return;
 
-        const p = { lat: cur.coords.latitude, lng: cur.coords.longitude, acc: cur.coords.accuracy ?? undefined };
+        const p = {
+          lat: cur.coords.latitude,
+          lng: cur.coords.longitude,
+          acc: cur.coords.accuracy ?? undefined,
+        };
         setCurPos(p);
-        post({ type: "SET_CURRENT", lat: p.lat, lng: p.lng, accuracy: p.acc, follow: true });
+        post({
+          type: "SET_CURRENT",
+          lat: p.lat,
+          lng: p.lng,
+          accuracy: p.acc,
+          follow: true,
+        });
         setLoading(false);
 
         watcherRef.current = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.Balanced, timeInterval: 3000, distanceInterval: 5, mayShowUserSettingsDialog: true },
+          {
+            accuracy: Location.Accuracy.Balanced,
+            timeInterval: 3000,
+            distanceInterval: 5,
+            mayShowUserSettingsDialog: true,
+          },
           (loc) => {
-            const np = { lat: loc.coords.latitude, lng: loc.coords.longitude, acc: loc.coords.accuracy ?? undefined };
+            const np = {
+              lat: loc.coords.latitude,
+              lng: loc.coords.longitude,
+              acc: loc.coords.accuracy ?? undefined,
+            };
             setCurPos(np);
-            post({ type: "SET_CURRENT", lat: np.lat, lng: np.lng, accuracy: np.acc, follow: false });
+            post({
+              type: "SET_CURRENT",
+              lat: np.lat,
+              lng: np.lng,
+              accuracy: np.acc,
+              follow: false,
+            });
             if (loading) setLoading(false);
           }
         );
@@ -125,7 +188,11 @@ export default function MovingSpotResult() {
       }
     })();
 
-    return () => { mounted = false; watcherRef.current?.remove(); watcherRef.current = null; };
+    return () => {
+      mounted = false;
+      watcherRef.current?.remove();
+      watcherRef.current = null;
+    };
   }, []);
 
   const handleWebViewMessage = (e: any) => {
@@ -133,7 +200,6 @@ export default function MovingSpotResult() {
       const msg = JSON.parse(e.nativeEvent.data);
       if (msg.type === "READY") setMapReady(true);
       else if (msg.type === "ERROR") console.warn("MAP ERROR:", msg);
-      // else if (msg.type === "MARKER_CLICK") { /* 바텀시트 열기 등 */ }
     } catch {}
   };
 
@@ -144,70 +210,162 @@ export default function MovingSpotResult() {
     if (!mapReady || !curPos) return;
     if (fetchedOnceRef.current) return;
     fetchedOnceRef.current = true;
-    fetchAndDrawCourse().catch((e) => console.warn("AUTO COURSE DRAW FAILED:", e?.message || String(e)));
+    fetchAndDrawCourse().catch((e) =>
+      console.warn("AUTO COURSE DRAW FAILED:", e?.message || String(e))
+    );
   }, [mapReady, curPos]);
 
   async function fetchAndDrawCourse() {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem("accessToken");
-      if (!token) { console.warn("토큰이 없습니다. 로그인 필요!"); setLoading(false); return; }
+      if (!token) {
+        console.warn("토큰이 없습니다. 로그인 필요!");
+        setLoading(false);
+        return;
+      }
 
       const payload = {
-        lat: curPos!.lat, lng: curPos!.lng,
+        lat: curPos!.lat,
+        lng: curPos!.lng,
         theme: (themes || []).map((t: any) => t.label),
         difficulty: (difficulty || []).map((d: any) => d.label),
         condition: (prefs || []).map((p: any) => p.label),
       };
-      const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+      const authHeader = token.startsWith("Bearer ")
+        ? token
+        : `Bearer ${token}`;
 
       const res = await axios.post(COURSES_URL, payload, {
-        headers: { Authorization: authHeader, "Content-Type": "application/json" },
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+        },
         validateStatus: () => true,
       });
-      if (res.status !== 200 || !Array.isArray(res.data) || res.data.length === 0) {
-        console.warn("COURSES ERROR:", res.status, res.data); setLoading(false); return;
+
+      if (
+        res.status !== 200 ||
+        !res.data ||
+        (Array.isArray(res.data) && res.data.length === 0)
+      ) {
+        console.warn("COURSES ERROR:", res.status, res.data);
+        setLoading(false);
+        return;
       }
 
-      const r = res.data[0];
+      const r = Array.isArray(res.data) ? res.data[0] : res.data;
+
       const origin: LatLng = toLatLng(r?.start ?? {});
       const destination: LatLng = toLatLng(r?.destination ?? {});
-      const waypoints: LatLng[] = Array.isArray(r?.waypoints) ? r.waypoints.map(toLatLng) : [];
+      const waypoints: LatLng[] = Array.isArray(r?.waypoints)
+        ? r.waypoints.map(toLatLng)
+        : [];
 
-      if (![origin, destination].every(p => isFinite(p.lat) && isFinite(p.lng))) {
-        console.warn("Invalid coordinates in response:", { origin, destination }); setLoading(false); return;
+      if (
+        ![origin, destination].every(
+          (p) => Number.isFinite(p.lat) && Number.isFinite(p.lng)
+        )
+      ) {
+        console.warn("Invalid coordinates in response:", {
+          origin,
+          destination,
+        });
+        setLoading(false);
+        return;
       }
 
       try {
         const { latlngs, totalDistance, totalTime } =
           await fetchTmapPedestrianRoute(origin, destination, waypoints);
 
-        post({ type: "DRAW_ROUTE", latlngs, origin, destination, waypoints, totalDistance, totalTime });
+        post({
+          type: "DRAW_ROUTE",
+          latlngs,
+          origin,
+          destination,
+          waypoints,
+          totalDistance,
+          totalTime,
+        });
         setRouteInfo({ distance: totalDistance, time: totalTime });
       } catch (e: any) {
         console.warn("MAP ERROR (RN fetch):", e?.message || String(e));
-        post({ type: "DRAW_STRAIGHT", points: [origin, ...waypoints, destination] });
+        post({
+          type: "DRAW_STRAIGHT",
+          points: [origin, ...waypoints, destination],
+        });
       }
     } catch (e: any) {
       console.warn("COURSES REQUEST FAILED:", e?.message || String(e));
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   function onPrimaryAction() {
-    if (!started) { setStarted(true); return; }
+    if (!started) {
+      setStarted(true);
+      return;
+    }
     navigation.navigate("Main");
   }
 
+  //버튼 (현재 위치/초기화)
+  const resetRecommended = async () => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        console.warn("토큰이 없습니다. 로그인 필요!");
+        return;
+      }
+      await axios.post(
+        "http://movingcash.sku-sku.com/movingspot/refresh",
+        {},
+        {
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+          validateStatus: () => true,
+        }
+      );
+      post({ type: "SET_MARKERS", markers: [] });
+      // post({ type: "CLEAR_ROUTE" }); // 필요 시 GoogleHtml에 구현
+    } catch (e: any) {
+      console.warn("REFRESH ERROR:", e?.message || String(e));
+    }
+  };
+
+  const centerToCurrent = () => {
+    if (!curPos) return;
+    post({ type: "MOVE_CAMERA", lat: curPos.lat, lng: curPos.lng, zoom: 16 });
+  };
+
   return (
     <View className="h-full bg-[#101010]">
-      {!started ? (<Header title="무빙과 함께 걷는 ai 추천 산책 코스" />) : (<Header title="Moving 스팟" />)}
+      {!started ? (
+        <Header title="무빙과 함께 걷는 ai 추천 산책 코스" />
+      ) : (
+        <Header title="Moving 스팟" />
+      )}
 
       {!started && (
         <View className="items-center">
-          <Text className="text-white text-[18px] font-bold mt-2">무빙과 함께 걸어볼까요?</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="my-6 mb-8" contentContainerStyle={{ paddingHorizontal: 16 }}>
+          <Text className="text-white text-[18px] font-bold mt-2">
+            무빙과 함께 걸어볼까요?
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="my-6 mb-8"
+            contentContainerStyle={{ paddingHorizontal: 16 }}
+          >
             {chips.map((item, i) => (
-              <View key={`${item.label}-${i}`} className="bg-[#FFFFFF] border-[#FF6B00] border px-4 py-2 mr-2 rounded-full flex-row items-center">
+              <View
+                key={`${item.label}-${i}`}
+                className="bg-[#FFFFFF] border-[#FF6B00] border px-4 py-2 mr-2 rounded-full flex-row items-center"
+              >
                 {!!item.emoji && <Text className="mr-1">{item.emoji}</Text>}
                 <Text className="text-black">{item.label}</Text>
               </View>
@@ -229,11 +387,21 @@ export default function MovingSpotResult() {
         {loading && (
           <View style={styles.overlay}>
             <ActivityIndicator size="large" />
-            <Text style={styles.title}>딱 맞는 산책 코스를 준비하고 있어요</Text>
+            <Text style={styles.title}>
+              딱 맞는 산책 코스를 준비하고 있어요
+            </Text>
           </View>
         )}
       </View>
-
+      {started && (
+        <MapActionButtons
+          variant="overlay"
+          showReset={false} 
+          onReset={resetRecommended}
+          onLocate={centerToCurrent}
+          style={{ zIndex: 50 }}
+        />
+      )}
       <View className={`items-center ${started ? "mb-3 mt-5" : "my-8"}`}>
         <Pressable
           onPress={onPrimaryAction}
@@ -241,7 +409,9 @@ export default function MovingSpotResult() {
           className="bg-[#E9690D] h-12 w-[85%] justify-center items-center rounded-full"
           style={{ opacity: mapReady ? 1 : 0.5 }}
         >
-          <Text style={{ color: "#fff", fontWeight: "700" }}>{started ? "종료하기" : "시작하기"}</Text>
+          <Text style={{ color: "#fff", fontWeight: "700" }}>
+            {started ? "종료하기" : "시작하기"}
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -250,8 +420,15 @@ export default function MovingSpotResult() {
 
 const styles = StyleSheet.create({
   overlay: {
-    position: "absolute", left: 0, right: 0, top: 0, bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center", paddingHorizontal: 16,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
   },
   title: { color: "#fff", fontSize: 20, marginTop: 12, fontWeight: "800" },
 });

@@ -20,7 +20,10 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { MainStackParamList } from "App";
 
-const BROWSER_KEY = (Constants.expoConfig?.extra as any)?.googleMapsKey as string;
+import MapActionButtons from "../../components/MapActionBtn";
+
+const BROWSER_KEY = (Constants.expoConfig?.extra as any)
+  ?.googleMapsKey as string;
 const BASE_URL = "http://localhost:8081";
 
 type LatLng = { lat: number; lng: number };
@@ -142,7 +145,11 @@ export default function MovingSpot() {
     }
 
     const label =
-      type === "food" ? "맛집 찾는 중…" : type === "cafe" ? "카페 찾는 중…" : "놀거리 찾는 중…";
+      type === "food"
+        ? "맛집 찾는 중…"
+        : type === "cafe"
+        ? "카페 찾는 중…"
+        : "놀거리 찾는 중…";
     setSearchLabel(label);
     setSearchLoading(true);
 
@@ -210,6 +217,37 @@ export default function MovingSpot() {
     }
   }
 
+  //버튼 두 개 (추천 초기화 / 현재 위치 중앙으로 )
+  const resetRecommended = async () => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        console.warn("토큰이 없습니다. 로그인 필요!");
+        return;
+      }
+      await axios.post(
+        "http://movingcash.sku-sku.com/movingspot/refresh",
+        {},
+        {
+          headers: {
+            Authorization: `${token}`, // Bearer 불필요
+            "Content-Type": "application/json",
+          },
+          validateStatus: () => true,
+        }
+      );
+      // 마커 초기화
+      post({ type: "SET_MARKERS", markers: [] });
+    } catch (e: any) {
+      console.warn("REFRESH ERROR:", e?.message || String(e));
+    }
+  };
+
+  const centerToCurrent = () => {
+    if (!curPos) return;
+    post({ type: "MOVE_CAMERA", lat: curPos.lat, lng: curPos.lng, zoom: 16 });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -233,10 +271,15 @@ export default function MovingSpot() {
             {!searchLoading && (
               <>
                 <Text style={styles.sub}>
-                  {isSlow ? "GPS가 조금 느리네요. 잠시만요!" : "위치 정보 가져오는 중"}
+                  {isSlow
+                    ? "GPS가 조금 느리네요. 잠시만요!"
+                    : "위치 정보 가져오는 중"}
                 </Text>
                 {isSlow && (
-                  <Pressable style={styles.btn} onPress={() => setLoading(false)}>
+                  <Pressable
+                    style={styles.btn}
+                    onPress={() => setLoading(false)}
+                  >
                     <Text style={styles.btnText}>그냥 지도부터 볼래</Text>
                   </Pressable>
                 )}
@@ -250,13 +293,19 @@ export default function MovingSpot() {
           index={0}
           snapPoints={snapPoints}
           enablePanDownToClose={false}
-          style={{ zIndex: 50, elevation: 50 }}
           backgroundStyle={{
             backgroundColor: "#1A1A1C",
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
           }}
-          handleIndicatorStyle={{ backgroundColor: "#ffffff80" }}
+          handleComponent={() => (
+            <MapActionButtons
+              variant="sheetFloat"
+              showReset
+              onReset={resetRecommended}
+              onLocate={centerToCurrent}
+            />
+          )}
         >
           <BottomSheetScrollView
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 15 }}
