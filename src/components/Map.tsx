@@ -1,15 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { View, Dimensions, Alert, StyleProp, ViewStyle } from "react-native";
+import React, { useState, useEffect, useRef, useMemo, JSX } from "react";
+import {
+  View,
+  Dimensions,
+  Alert,
+  StyleProp,
+  ViewStyle,
+  Platform,
+} from "react-native";
 import MapView, { Marker, Polyline, Region, LatLng } from "react-native-maps";
+import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+//구글 키 관련
+import Constants from "expo-constants";
+
+const GOOGLE_JS_KEY = (Constants.expoConfig?.extra as any)
+  ?.googleMapsKey as string;
 
 export default function Map(): JSX.Element {
   const { width, height } = Dimensions.get("window");
 
   const [currentLocation, setCurrentLocation] = useState<LatLng | null>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<LatLng[]>([]);
+  const simRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // 위치 권한 요청 및 현재 위치 가져오기
+  const startProgressiveDraw = (fullPath: LatLng[], intervalMs = 700) => {
+    if (!fullPath || fullPath.length === 0) return;
+    if (simRef.current) clearInterval(simRef.current);
+    setRouteCoordinates([fullPath[0]]);
+    let i = 1;
+    simRef.current = setInterval(() => {
+      setRouteCoordinates((prev) => {
+        if (i >= fullPath.length) {
+          if (simRef.current) clearInterval(simRef.current);
+          return prev;
+        }
+        const next = fullPath[i++];
+        return [...prev, next];
+      });
+    }, intervalMs);
+  };
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -18,58 +51,58 @@ export default function Map(): JSX.Element {
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      }).catch(() => null);
+      if (!loc) return;
+
       const initialLatLng: LatLng = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
       };
       setCurrentLocation(initialLatLng);
-      setRouteCoordinates([initialLatLng]);
+
+      const todayISO = new Date().toISOString().split("T")[0] + "T00:00:00";
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        setRouteCoordinates([initialLatLng]);
+        return;
+      }
+
+      try {
+        const res = await axios.post(
+          "http://movingcash.sku-sku.com/mainPage",
+          {
+            status: "RUNNING",
+            startDate: todayISO,
+            endDate: todayISO,
+            todayDate: todayISO,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token.startsWith("Bearer ")
+                ? token
+                : `Bearer ${token}`,
+            },
+            validateStatus: () => true,
+          }
+        );
+
+        const path: LatLng[] = Array.isArray(res.data?.recentPath)
+          ? res.data.recentPath
+          : [];
+        if (path.length > 1) startProgressiveDraw(path, 700);
+        else setRouteCoordinates([initialLatLng]);
+      } catch {
+        setRouteCoordinates([initialLatLng]);
+      }
     })();
+
+    return () => {
+      if (simRef.current) clearInterval(simRef.current);
+    };
   }, []);
-
-  // 이동 경로 시뮬레이션
-  useEffect(() => {
-    if (!currentLocation) return;
-
-    const exampleRoute: LatLng[] = [
-      {
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-      },
-      {
-        latitude: currentLocation.latitude + 0.0005,
-        longitude: currentLocation.longitude + 0.0005,
-      },
-      {
-        latitude: currentLocation.latitude + 0.001,
-        longitude: currentLocation.longitude + 0.001,
-      },
-      {
-        latitude: currentLocation.latitude + 0.0015,
-        longitude: currentLocation.longitude + 0.0015,
-      },
-      {
-        latitude: currentLocation.latitude + 0.002,
-        longitude: currentLocation.longitude + 0.002,
-      },
-    ];
-
-    let index = 1; // 첫 좌표는 이미 routeCoordinates에 있음
-    const interval = setInterval(() => {
-      setRouteCoordinates((prev) => {
-        if (index >= exampleRoute.length) {
-          clearInterval(interval);
-          return prev;
-        }
-        const next = exampleRoute[index];
-        index += 1;
-        return [...prev, next];
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [currentLocation]);
 
   if (!currentLocation) {
     return <View className="flex-1 justify-center items-center bg-[#101010]" />;
@@ -79,6 +112,7 @@ export default function Map(): JSX.Element {
     width: width * 0.93,
     height: height * 0.19,
     borderRadius: 10,
+    overflow: "hidden",
   };
 
   const initialRegion: Region = {
@@ -88,6 +122,23 @@ export default function Map(): JSX.Element {
     longitudeDelta: 0.005,
   };
 
+  // Android
+  if (Platform.OS === "android") {
+    return (
+      <View
+        className="justify-center items-center bg-[#101010]"
+        style={{ flex: 1 }}>
+        <GoogleMapsWebView
+          style={mapStyle}
+          googleKey={GOOGLE_JS_KEY}
+          current={currentLocation}
+          route={routeCoordinates}
+        />
+      </View>
+    );
+  }
+
+  // iOS: 기존 MapView 유지
   return (
     <View className="justify-center items-center bg-[#101010]">
       <MapView
@@ -98,22 +149,102 @@ export default function Map(): JSX.Element {
         scrollEnabled
         pitchEnabled
         rotateEnabled>
-        {/* 현재 위치 마커 */}
         {routeCoordinates.length > 0 && (
           <Marker
             coordinate={routeCoordinates[routeCoordinates.length - 1]}
             title="현재 위치"
           />
         )}
-
-        {/* 이동 경로 Polyline */}
-        <Polyline
-          key={routeCoordinates.length}
-          coordinates={routeCoordinates}
-          strokeColor="#E9690D"
-          strokeWidth={3}
-        />
+        {routeCoordinates.length > 1 && (
+          <Polyline
+            coordinates={routeCoordinates}
+            strokeColor="#E9690D"
+            strokeWidth={3}
+          />
+        )}
       </MapView>
     </View>
+  );
+}
+
+/* ===== Android: WebView + Google Maps JS ===== */
+function GoogleMapsWebView({
+  style,
+  googleKey,
+  current,
+  route,
+}: {
+  style: any;
+  googleKey: string;
+  current: LatLng | null;
+  route: LatLng[];
+}) {
+  const ref = useRef<WebView>(null);
+
+  const html = useMemo(
+    () => `
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<style>html,body,#map{height:100%;margin:0;padding:0;background:#101010}</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  let map, marker, poly;
+  let lastPayload = null;
+  function initMap(){
+    map = new google.maps.Map(document.getElementById('map'), {
+      center:{lat:37.5665,lng:126.9780}, zoom:15, disableDefaultUI:true
+    });
+    if(lastPayload) applyPayload(lastPayload);
+  }
+  function applyPayload(payload){
+    const cur = payload.current;
+    const route = payload.route || [];
+    if(cur){
+      const pos = {lat:cur.latitude,lng:cur.longitude};
+      if(!marker){ marker=new google.maps.Marker({position:pos,map,title:"현재 위치"}); map.setCenter(pos); map.setZoom(16); }
+      else { marker.setPosition(pos); }
+    }
+    if(Array.isArray(route) && route.length>1){
+      const path = route.map(p=>({lat:p.latitude,lng:p.longitude}));
+      if(poly){ poly.setPath(path); }
+      else {
+        poly = new google.maps.Polyline({ map, path, strokeColor:"#E9690D", strokeOpacity:1, strokeWeight:4 });
+      }
+    }
+  }
+  function safeParse(d){ try{return JSON.parse(d)}catch(_){return null} }
+  function receive(data){
+    const payload = safeParse(data); if(!payload) return;
+    lastPayload = payload; if(window.google && window.google.maps && map){ applyPayload(payload); }
+  }
+  document.addEventListener('message',(e)=>receive(e.data));
+  window.addEventListener('message',(e)=>receive(e.data));
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=${googleKey}&callback=initMap" async defer></script>
+</body>
+</html>`,
+    [googleKey]
+  );
+
+  useEffect(() => {
+    const payload = JSON.stringify({ current, route });
+    const js = `window.postMessage('${payload}', '*'); true;`;
+    ref.current?.injectJavaScript(js);
+  }, [current, route]);
+
+  return (
+    <WebView
+      ref={ref}
+      originWhitelist={["*"]}
+      source={{ html }}
+      style={style}
+      javaScriptEnabled
+      domStorageEnabled
+      onMessage={() => {}}
+    />
   );
 }
