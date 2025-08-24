@@ -39,7 +39,6 @@ export type RootTabParamList = {
   StoreTab: undefined;
   PointTab: undefined;
   MyPageTab: undefined;
-  StartTab: undefined;
 };
 
 export type StartStackParamList = {
@@ -203,12 +202,6 @@ export default function App() {
             name="MyPageTab"
             component={MyPageStackScreen}
             options={{ title: "마이페이지" }}
-          />
-          <Tab.Screen
-            name="StartTab"
-            component={StartStackScreen}
-            options={{ title: "시작화면" }}
-            //시작화면은 일단 작업할때 사용하고 나중에 수정합시당
           />
         </Tab.Navigator>
       </NavigationContainer>

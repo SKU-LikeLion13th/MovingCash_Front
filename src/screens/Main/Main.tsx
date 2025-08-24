@@ -21,7 +21,7 @@ export default function Main() {
       <View className="mt-8">
         <Map />
       </View>
-      <View className="mt-8">
+      <View className="my-8">
         <StartNow />
       </View>
     </ScrollView>

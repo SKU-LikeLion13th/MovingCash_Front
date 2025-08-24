@@ -38,7 +38,7 @@ export default function MovingSpot() {
 
   const [curPos, setCurPos] = useState<LatLng | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["4%", "20%", "35%"], []);
+  const snapPoints = useMemo(() => ["10%", "20%", "42%"], []);
 
   const post = (msg: any) => webRef.current?.postMessage(JSON.stringify(msg));
 
@@ -186,7 +186,7 @@ export default function MovingSpot() {
         payload,
         {
           headers: {
-            Authorization: `${token}`, // 서버가 Bearer 요구하면 `Bearer ${token}`로 바꿔!
+            Authorization: `${token}`,
             "Content-Type": "application/json",
           },
           validateStatus: (s) => s === 200,
@@ -262,8 +262,8 @@ export default function MovingSpot() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
+    <View className="h-full bg-[#101010]">
+      <View className="h-full mt-8">
         <Header title="Moving 스팟" />
         <WebView
           ref={webRef}
