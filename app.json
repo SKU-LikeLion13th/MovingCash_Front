@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "config": {
-        "googleMapsApiKey": "AIzaSyBiNa6gj-vaHpgcse5dQ3ew6-1fR6ajr7w"
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
       }
     },
     "android": {
@@ -25,14 +25,10 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBiNa6gj-vaHpgcse5dQ3ew6-1fR6ajr7w"
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
         }
       },
-      "edgeToEdgeEnabled": true,
-      "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
-      ]
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
