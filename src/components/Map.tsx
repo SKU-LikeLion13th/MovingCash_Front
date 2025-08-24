@@ -97,8 +97,7 @@ export default function Map(): JSX.Element {
         zoomEnabled
         scrollEnabled
         pitchEnabled
-        rotateEnabled
-      >
+        rotateEnabled>
         {/* 현재 위치 마커 */}
         {routeCoordinates.length > 0 && (
           <Marker

@@ -2,11 +2,15 @@ import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { RootTabParamList } from "../../../../App";
 import { useWalking } from "../context/WalkingContext";
 
 export default function WalkingPoints() {
   const [point, setPoint] = useState(0);
   const { points } = useWalking();
+  const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -14,6 +18,7 @@ export default function WalkingPoints() {
         const token = await AsyncStorage.getItem("accessToken");
         if (!token) {
           console.warn("토큰이 없습니다. 로그인 필요!");
+          navigation.navigate("StartTab");
           return;
         }
 
@@ -29,6 +34,13 @@ export default function WalkingPoints() {
         );
 
         if (!response.ok) {
+          if (response.status === 401) {
+            console.warn("인증 토큰이 만료되었습니다. 다시 로그인해주세요.");
+            await AsyncStorage.removeItem("accessToken");
+            navigation.navigate("StartTab");
+            return;
+          }
+
           console.error(
             "API 호출 실패:",
             response.status,
@@ -47,7 +59,7 @@ export default function WalkingPoints() {
     };
 
     fetchUserName();
-  }, []);
+  }, [navigation]);
 
   return (
     <View className="my-8">
@@ -77,7 +89,7 @@ export default function WalkingPoints() {
         </Text>
       </View>
 
-      {/* 오늘의 러닝 적립 포인트 */}
+      {/* 오늘의 워킹 적립 포인트 */}
       <View className="flex-row items-center justify-center mt-2">
         <Text className="text-white font-notoSemiBold text-[13px]">
           오늘의 워킹 적립 포인트
