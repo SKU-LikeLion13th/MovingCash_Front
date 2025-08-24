@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 export default function Start() {
   const navigation = useNavigation();
@@ -15,13 +15,8 @@ export default function Start() {
 
       <TouchableOpacity
         className={`flex w-[80%] justify-center items-center py-3 rounded-3xl bg-[#FFFFFF]`}
-        onPress={() => navigation.navigate('Main')}
-      >
-        <Text
-          className={`font-bold text-[#000000]`}
-        >
-          시작하기
-        </Text>
+        onPress={() => navigation.getParent()?.navigate("MainTab" as never)}>
+        <Text className={`font-bold text-[#000000]`}>시작하기</Text>
       </TouchableOpacity>
     </View>
   );

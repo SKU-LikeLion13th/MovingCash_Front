@@ -102,11 +102,11 @@ const MyPageStack = createNativeStackNavigator<MyPageStackParamList>();
 function StartStackScreen() {
   return (
     <StartStack.Navigator screenOptions={{ headerShown: false }}>
+      <StartStack.Screen name="Splash" component={Splash} />
       <StartStack.Screen name="Login" component={Login} />
+      <StartStack.Screen name="Signup" component={Signup} />
       <StartStack.Screen name="Map" component={Map} />
       <StartStack.Screen name="RealTimeMap" component={RealTimeMap} />
-      <StartStack.Screen name="Splash" component={Splash} />
-      <StartStack.Screen name="Signup" component={Signup} />
       <StartStack.Screen name="Start" component={Start} />
     </StartStack.Navigator>
   );

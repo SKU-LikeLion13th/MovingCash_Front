@@ -1,15 +1,46 @@
-import React from "react";
-import { View, Text, Image } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Animated, Image } from "react-native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StartStackParamList } from "../../../App";
 
-export default function Splash() {
+type SplashScreenNavigationProp = NativeStackNavigationProp<
+  StartStackParamList,
+  "Splash"
+>;
+
+type Props = {
+  navigation: SplashScreenNavigationProp;
+};
+
+export default function Splash({ navigation }: Props) {
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        navigation.replace("Login"); // Login으로 이동
+      });
+    }, 1000);
+  }, []);
 
   return (
-    <View className="flex flex-1 justify-center items-center bg-[#101010]">
+    <Animated.View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#101010",
+        opacity: fadeAnim,
+      }}>
       <Image
         source={require("../../../assets/images/splash.png")}
-        className="mb-8 w-44 h-44"
+        style={{ width: 176, height: 176, marginBottom: 32 }}
         resizeMode="contain"
       />
-    </View>
+    </Animated.View>
   );
 }
