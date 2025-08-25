@@ -115,7 +115,8 @@ export default function AvailablePoints() {
     }
   };
 
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   const handleMissionPress = async (mission: any) => {
     if (mission.key === "movingSpot") {

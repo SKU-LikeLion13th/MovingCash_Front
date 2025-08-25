@@ -44,7 +44,8 @@ export default function Map(): JSX.Element {
     }, intervalMs);
   };
 
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   useEffect(() => {
     (async () => {
@@ -130,7 +131,8 @@ export default function Map(): JSX.Element {
     return (
       <View
         className="justify-center items-center bg-[#101010]"
-        style={{ flex: 1 }}>
+        style={{ flex: 1 }}
+      >
         <GoogleMapsWebView
           style={mapStyle}
           googleKey={GOOGLE_JS_KEY}
@@ -151,7 +153,8 @@ export default function Map(): JSX.Element {
         zoomEnabled
         scrollEnabled
         pitchEnabled
-        rotateEnabled>
+        rotateEnabled
+      >
         {routeCoordinates.length > 0 && (
           <Marker
             coordinate={routeCoordinates[routeCoordinates.length - 1]}

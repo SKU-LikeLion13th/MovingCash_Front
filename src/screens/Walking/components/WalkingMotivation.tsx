@@ -16,7 +16,8 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
   const { points, steps } = useWalking();
   const navigation = useNavigation();
 
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,16 +42,13 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/sessions/getPointAndStep`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/sessions/getPointAndStep`, {
+          method: "GET",
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           if (response.status === 401) {

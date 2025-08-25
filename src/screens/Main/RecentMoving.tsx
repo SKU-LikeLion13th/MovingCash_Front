@@ -16,7 +16,8 @@ export default function RecentMoving() {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<MovingData>({ calories: 0, distance: 0 });
   const [name, setName] = useState("User");
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   const fetchData = async () => {
     try {

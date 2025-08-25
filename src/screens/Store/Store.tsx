@@ -52,7 +52,8 @@ export default function Store() {
 
   const [point, setPoint] = useState<number>(0);
 
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   useEffect(() => {
     const fetchPoint = async () => {
@@ -63,16 +64,13 @@ export default function Store() {
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/sessions/getPointAndStep`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/sessions/getPointAndStep`, {
+          method: "GET",
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           console.error(
