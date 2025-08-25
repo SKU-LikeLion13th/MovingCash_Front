@@ -4,11 +4,14 @@ import Svg, { Circle, Path } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useRunning } from "../context/RunningContext";
+import Constants from "expo-constants";
 
 export default function RunningPoints() {
   const [point, setPoint] = useState(0);
   const { points } = useRunning();
   const navigation = useNavigation();
+
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   useEffect(() => {
     const fetchUserPoints = async () => {
@@ -33,7 +36,7 @@ export default function RunningPoints() {
         }
 
         const response = await fetch(
-          `{API_URL}/sessions/getPointAndStep`,
+          `${API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {
