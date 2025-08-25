@@ -8,6 +8,7 @@ import Point from "../../../assets/icons/Point.svg";
 import ChallengeModal from "./ChallengeModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import Constants from "expo-constants";
 
 type DetailRoute = RouteProp<MainStackParamList, "ChallengeDetail">;
 
@@ -16,6 +17,8 @@ const walkingImg = require("../../../assets/images/Challenge/walking.png");
 
 const RUNNING_STYLE: ImageStyle = { width: "30%" };
 const WALKING_STYLE: ImageStyle = { width: "40%", marginRight: 30 };
+
+const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
 const todayStr = () => {
   const d = new Date();
@@ -60,7 +63,7 @@ export default function ChallengeDetail() {
       const token = await AsyncStorage.getItem("accessToken");
       if (!token) return;
       await axios.post(
-        "http://movingcash.sku-sku.com/join/add",
+        `${API_URL}/join/add`,
         { challengeId: id },
         {
           headers: {

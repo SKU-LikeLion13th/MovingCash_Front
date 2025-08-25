@@ -12,6 +12,7 @@ import { WebView } from "react-native-webview";
 import * as Location from "expo-location";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 //구글 키 관련
 import Constants from "expo-constants";
@@ -43,6 +44,8 @@ export default function Map(): JSX.Element {
     }, intervalMs);
   };
 
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -71,7 +74,7 @@ export default function Map(): JSX.Element {
 
       try {
         const res = await axios.post(
-          "http://movingcash.sku-sku.com/mainPage",
+          `${API_URL}/mainPage`,
           {
             status: "RUNNING",
             startDate: todayISO,

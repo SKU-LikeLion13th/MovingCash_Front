@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { NavigationProp } from "@react-navigation/native";
 import { useWalking } from "../context/WalkingContext";
+import Constants from "expo-constants";
 
 // 전체 네비게이션 구조를 포함하는 타입 정의
 type RootNavigationParamList = {
@@ -18,6 +19,7 @@ export default function WalkingPoints() {
   const [point, setPoint] = useState(0);
   const { points } = useWalking();
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -31,7 +33,7 @@ export default function WalkingPoints() {
         }
 
         const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          `${API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {

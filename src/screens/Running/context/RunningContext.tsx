@@ -9,6 +9,7 @@ import React, {
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
+import Constants from 'expo-constants';
 
 export type StatusType = "start" | "ongoing" | "stop" | "finish";
 
@@ -69,6 +70,10 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
 
   // 새로 추가된 refs
   const hasDataBeenSentRef = useRef<boolean>(hasDataBeenSent);
+
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
+  const WS_URL = Constants?.expoConfig?.extra?.wsUrl ?? "wss://movingcash.sku-sku.com/ws/location";
+
 
   useEffect(() => {
     statusRef.current = status;
@@ -151,6 +156,7 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
     hasDataBeenSentRef.current = false;
     pointIndexRef.current = 1;
   };
+  
 
   // API
   const endSession = async () => {
@@ -184,7 +190,7 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
       };
       console.log("세션 종료 요청:", payload);
 
-      const res = await fetch("http://movingcash.sku-sku.com/sessions/end", {
+      const res = await fetch(`${API_URL}/sessions/end`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -210,7 +216,7 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
         console.error("토큰이 없습니다.");
         return;
       }
-      const res = await fetch("http://movingcash.sku-sku.com/sessions/start", {
+      const res = await fetch(`${API_URL}/sessions/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -312,9 +318,7 @@ export const RunningProvider = ({ children }: RunningProviderProps) => {
 
       console.log("WebSocket 연결 시작...");
       const ws = new WebSocket(
-        `ws://movingcash.sku-sku.com/ws/location?token=${encodeURIComponent(
-          token
-        )}`
+        `${WS_URL}?token=${encodeURIComponent(token)}`
       );
       websocketRef.current = ws;
 

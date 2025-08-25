@@ -5,11 +5,13 @@ import { useNavigation } from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RootTabParamList } from "../../../App"; // App.tsx에서 타입 import
 import axios from "axios";
+import Constants from "expo-constants";
 
 type NavigationProp = BottomTabNavigationProp<RootTabParamList>;
 
 export default function Signup() {
   const navigation = useNavigation<NavigationProp>();
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   // 닉네임, 아이디, 비밀번호 상태
   const [nickname, setNickname] = useState("");
@@ -44,7 +46,7 @@ export default function Signup() {
 
     try {
       const response = await axios.post(
-        "http://movingcash.sku-sku.com/auth/signup",
+        `${API_URL}/auth/signup`,
         {
           name: nickname,
           userId: id,

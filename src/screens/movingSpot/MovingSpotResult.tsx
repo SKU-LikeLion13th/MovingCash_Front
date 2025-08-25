@@ -24,7 +24,8 @@ const GOOGLE_KEY = (Constants.expoConfig?.extra as any)
   ?.googleMapsKey as string;
 const TMAP_APP_KEY = (Constants.expoConfig?.extra as any)?.tmapKey as string;
 const BASE_URL = "http://localhost:8081";
-const COURSES_URL = "http://movingcash.sku-sku.com/movingspot/courses";
+const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+const COURSES_URL = `${API_URL}/movingspot/courses`;
 
 type R = RouteProp<MainStackParamList, "MovingSpotResult">;
 type LatLng = { lat: number; lng: number; name?: string };

@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StoreStackParamList } from "App";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 type Props = NativeStackScreenProps<StoreStackParamList, "ExchangeDetail">;
 
@@ -13,6 +14,7 @@ export default function ExchangeDetail({ route, navigation }: Props) {
   const [agreed, setAgreed] = useState(false);
   const [exchanged, setExchanged] = useState(false);
   const [point, setPoint] = useState<number>(0);
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   // 필요 포인트
   const neededPoints = parseInt(item.points.replace(/,/g, ""));
@@ -39,7 +41,7 @@ export default function ExchangeDetail({ route, navigation }: Props) {
         }
 
         const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          `${API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {

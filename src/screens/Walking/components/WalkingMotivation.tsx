@@ -3,6 +3,7 @@ import { View, Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useWalking } from "../context/WalkingContext";
+import Constants from "expo-constants";
 
 type StatusType = "start" | "ongoing" | "stop" | "finish";
 
@@ -14,6 +15,8 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
   const [yesterdayStep, setYesterdayStep] = useState(0);
   const { points, steps } = useWalking();
   const navigation = useNavigation();
+
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -39,7 +42,7 @@ export default function WalkingMotivation({ status }: WalkingMotivationProps) {
         }
 
         const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          `${API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {

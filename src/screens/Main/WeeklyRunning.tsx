@@ -3,10 +3,13 @@ import { View, Text } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import Constants from "expo-constants";
 
 export default function WeeklyRunning() {
   const [days, setDays] = useState<number[]>([]); // 0=참여X, 1=참여, 2=오늘
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   const fetchWeeklyData = async () => {
     try {
@@ -28,7 +31,7 @@ export default function WeeklyRunning() {
 
       // API 요청
       const response = await axios.post(
-        "http://movingcash.sku-sku.com/mainPage",
+        `${API_URL}/mainPage`,
         {
           status: "RUNNING",
           startDate: monday.toISOString().split("T")[0] + "T00:00:00",

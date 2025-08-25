@@ -18,6 +18,7 @@ import { CompositeNavigationProp } from "@react-navigation/native";
 import { StartStackParamList, RootTabParamList } from "../../../App";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 type LoginNavigationProp = CompositeNavigationProp<
   StackNavigationProp<StartStackParamList, "Login">,
@@ -25,6 +26,7 @@ type LoginNavigationProp = CompositeNavigationProp<
 >;
 
 export default function Login() {
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
   const [isEnabled, setIsEnabled] = useState(false);
   const navigation = useNavigation<LoginNavigationProp>();
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
@@ -39,7 +41,7 @@ export default function Login() {
     Keyboard.dismiss();
     try {
       const response = await axios.post(
-        "http://movingcash.sku-sku.com/auth/login",
+        `${API_URL}/auth/login`,
         {
           userId: id,
           password: password,

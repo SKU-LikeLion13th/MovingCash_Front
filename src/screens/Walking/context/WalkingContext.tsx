@@ -10,6 +10,7 @@ import * as Location from "expo-location";
 import { Accelerometer } from "expo-sensors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
+import Constants from "expo-constants";
 
 export type StatusType = "start" | "ongoing" | "stop" | "finish";
 
@@ -180,6 +181,10 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
     resetSteps();
   };
 
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
+  const WS_URL = Constants?.expoConfig?.extra?.wsUrl ?? "wss://movingcash.sku-sku.com/ws/location";
+
+
   // API
   const endSession = async () => {
     try {
@@ -212,7 +217,7 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
       };
       console.log("세션 종료 요청:", payload);
 
-      const res = await fetch("http://movingcash.sku-sku.com/sessions/end", {
+      const res = await fetch(`${API_URL}/sessions/end`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -238,7 +243,7 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
         console.error("토큰이 없습니다.");
         return;
       }
-      const res = await fetch("http://movingcash.sku-sku.com/sessions/start", {
+      const res = await fetch(`${API_URL}/sessions/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -413,9 +418,7 @@ export const WalkingProvider = ({ children }: WalkingProviderProps) => {
 
       console.log("WebSocket 연결 시작...");
       const ws = new WebSocket(
-        `ws://movingcash.sku-sku.com/ws/location?token=${encodeURIComponent(
-          token
-        )}`
+        `${WS_URL}?token=${encodeURIComponent(token)}`
       );
       websocketRef.current = ws;
 

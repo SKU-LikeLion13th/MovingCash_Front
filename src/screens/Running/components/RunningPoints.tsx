@@ -33,7 +33,7 @@ export default function RunningPoints() {
         }
 
         const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          `{API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {

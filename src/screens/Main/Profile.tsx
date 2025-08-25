@@ -4,6 +4,7 @@ import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import Constants from "expo-constants";
 
 export default function Profile() {
   const imageSize = 60; // 이미지 크기
@@ -14,6 +15,7 @@ export default function Profile() {
   const progress = 0.7; // 70% 진행
 
   const [name, setName] = useState<string>("User");
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   useFocusEffect(
     useCallback(() => {
@@ -26,7 +28,7 @@ export default function Profile() {
           }
 
           const response = await fetch(
-            "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+            `${API_URL}/sessions/getPointAndStep`,
             {
               method: "GET",
               headers: {

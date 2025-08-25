@@ -17,6 +17,7 @@ import { CompositeNavigationProp } from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RootTabParamList, MainStackParamList } from "App";
 import axios from "axios";
+import Constants from "expo-constants";
 
 type PointTabNavProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootTabParamList, "PointTab">,
@@ -114,6 +115,8 @@ export default function AvailablePoints() {
     }
   };
 
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+
   const handleMissionPress = async (mission: any) => {
     if (mission.key === "movingSpot") {
       if (mission.btnType === "participate") {
@@ -126,7 +129,7 @@ export default function AvailablePoints() {
           const token = await AsyncStorage.getItem("accessToken");
           const pointsToAdd = parseInt(mission.point.replace(/[^0-9]/g, ""));
           const response = await axios.post(
-            "http://movingcash.sku-sku.com/addPoints",
+            `${API_URL}/addPoints`,
             {
               points: pointsToAdd,
             },

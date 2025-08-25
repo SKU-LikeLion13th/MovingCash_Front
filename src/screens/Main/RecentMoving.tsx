@@ -4,6 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import Constants from "expo-constants";
 
 interface MovingData {
   calories: number;
@@ -15,6 +16,7 @@ export default function RecentMoving() {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<MovingData>({ calories: 0, distance: 0 });
   const [name, setName] = useState("User");
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   const fetchData = async () => {
     try {
@@ -48,7 +50,7 @@ export default function RecentMoving() {
       const status = mode === "Running" ? "RUNNING" : "WALKING";
 
       const response = await axios.post(
-        "http://movingcash.sku-sku.com/mainPage",
+        `${API_URL}/mainPage`,
         { status, startDate, endDate, todayDate: todayStr },
         {
           headers: { Authorization: token, "Content-Type": "application/json" },

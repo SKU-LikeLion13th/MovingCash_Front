@@ -6,10 +6,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MainStackParamList } from "App";
+import Constants from "expo-constants";
 
 export default function PointMain() {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const [point, setPoint] = useState<number>(0);
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   const missions = [
     {
@@ -46,7 +48,7 @@ export default function PointMain() {
         }
 
         const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          `${API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {
