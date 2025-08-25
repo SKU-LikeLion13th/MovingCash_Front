@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { StoreStackParamList } from "App";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 export default function Store() {
   const [activeTab, setActiveTab] = useState<"nearby" | "membership" | "goods">(
@@ -51,6 +52,8 @@ export default function Store() {
 
   const [point, setPoint] = useState<number>(0);
 
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+
   useEffect(() => {
     const fetchPoint = async () => {
       try {
@@ -61,7 +64,7 @@ export default function Store() {
         }
 
         const response = await fetch(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          `${API_URL}/sessions/getPointAndStep`,
           {
             method: "GET",
             headers: {

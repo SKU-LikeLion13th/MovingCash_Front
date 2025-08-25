@@ -18,6 +18,7 @@ import Point from "../../../assets/icons/Point.svg";
 import { MainStackParamList } from "App";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 type LevelCode = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 type ActivityCode = "RUNNING" | "WALKING";
@@ -51,6 +52,7 @@ const GAP = 15;
 const CARD_WIDTH = (SCREEN_WIDTH - H_PADDING * 2 - GAP) / 2;
 const CARD_HEIGHT = 260;
 const BG_COLORS = ["#B8DDFF", "#F9E482", "#FFBF92", "#E7F982"];
+const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
 const IMAGE_BY_ACTIVITY: Record<ActivityCode, ActivityImage> = {
   RUNNING: {
@@ -176,7 +178,7 @@ export default function Challenge() {
       }
       const date = todayStr();
       const res = await axios.get(
-        `http://movingcash.sku-sku.com/challenge/all/${date}`,
+        `${API_URL}/challenge/all/${date}`,
         {
           headers: {
             Authorization: `${token}`,

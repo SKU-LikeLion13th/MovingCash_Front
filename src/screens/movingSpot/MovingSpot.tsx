@@ -35,6 +35,7 @@ export default function MovingSpot() {
   const webRef = useRef<WebView>(null);
   const watcherRef = useRef<Location.LocationSubscription | null>(null);
   const googleHtml = useMemo(() => makeGoogleHtml(BROWSER_KEY), [BROWSER_KEY]);
+  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
 
   const [curPos, setCurPos] = useState<LatLng | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
@@ -182,7 +183,7 @@ export default function MovingSpot() {
       }
 
       const res = await axios.post(
-        "http://movingcash.sku-sku.com/movingspot/places",
+        `${API_URL}/movingspot/places`,
         payload,
         {
           headers: {
