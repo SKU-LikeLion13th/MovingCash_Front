@@ -9,7 +9,8 @@ export default function WeeklyRunning() {
   const [days, setDays] = useState<number[]>([]); // 0=참여X, 1=참여, 2=오늘
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   const fetchWeeklyData = async () => {
     try {

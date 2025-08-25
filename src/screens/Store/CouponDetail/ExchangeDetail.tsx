@@ -14,7 +14,8 @@ export default function ExchangeDetail({ route, navigation }: Props) {
   const [agreed, setAgreed] = useState(false);
   const [exchanged, setExchanged] = useState(false);
   const [point, setPoint] = useState<number>(0);
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   // 필요 포인트
   const neededPoints = parseInt(item.points.replace(/,/g, ""));
@@ -40,16 +41,13 @@ export default function ExchangeDetail({ route, navigation }: Props) {
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/sessions/getPointAndStep`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/sessions/getPointAndStep`, {
+          method: "GET",
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           console.error(

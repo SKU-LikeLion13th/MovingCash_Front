@@ -15,7 +15,8 @@ export default function Profile() {
   const progress = 0.7; // 70% 진행
 
   const [name, setName] = useState<string>("User");
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   useFocusEffect(
     useCallback(() => {
@@ -27,16 +28,13 @@ export default function Profile() {
             return;
           }
 
-          const response = await fetch(
-            `${API_URL}/sessions/getPointAndStep`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: token,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+          const response = await fetch(`${API_URL}/sessions/getPointAndStep`, {
+            method: "GET",
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          });
 
           if (!response.ok) {
             console.error(

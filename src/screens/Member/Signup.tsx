@@ -11,7 +11,8 @@ type NavigationProp = BottomTabNavigationProp<RootTabParamList>;
 
 export default function Signup() {
   const navigation = useNavigation<NavigationProp>();
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   // 닉네임, 아이디, 비밀번호 상태
   const [nickname, setNickname] = useState("");
@@ -45,14 +46,11 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/signup`,
-        {
-          name: nickname,
-          userId: id,
-          password: password,
-        }
-      );
+      const response = await axios.post(`${API_URL}/auth/signup`, {
+        name: nickname,
+        userId: id,
+        password: password,
+      });
 
       if (response.status === 200 || response.status === 201) {
         Alert.alert("회원가입 성공!", "로그인 화면으로 이동합니다.", [
@@ -176,13 +174,15 @@ export default function Signup() {
               : "bg-[#222222]"
           }`}
           disabled={!nickname || !id || !isCheckedPw || isLoading}
-          onPress={handleSignup}>
+          onPress={handleSignup}
+        >
           <Text
             className={`font-bold ${
               nickname && id && isCheckedPw && !isLoading
                 ? "text-white"
                 : "text-[#A1A1A1]"
-            }`}>
+            }`}
+          >
             {isLoading ? "처리중..." : "회원가입"}
           </Text>
         </TouchableOpacity>

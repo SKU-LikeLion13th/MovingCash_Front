@@ -26,7 +26,8 @@ type LoginNavigationProp = CompositeNavigationProp<
 >;
 
 export default function Login() {
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
   const [isEnabled, setIsEnabled] = useState(false);
   const navigation = useNavigation<LoginNavigationProp>();
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
@@ -40,13 +41,10 @@ export default function Login() {
 
     Keyboard.dismiss();
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/login`,
-        {
-          userId: id,
-          password: password,
-        }
-      );
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        userId: id,
+        password: password,
+      });
 
       if (response.status === 200) {
         const { token, tokenType } = response.data;
@@ -78,7 +76,8 @@ export default function Login() {
             fontSize: 22,
             fontWeight: "bold",
             marginBottom: 24,
-          }}>
+          }}
+        >
           로그인
         </Text>
 
@@ -128,7 +127,8 @@ export default function Login() {
             alignItems: "center",
             justifyContent: "flex-end",
             marginBottom: 20,
-          }}>
+          }}
+        >
           <Text style={{ color: "#FFFFFF", fontSize: 11, marginRight: 8 }}>
             로그인 상태유지
           </Text>
@@ -179,7 +179,8 @@ export default function Login() {
             flexDirection: "row",
             justifyContent: "center",
             marginBottom: 40,
-          }}>
+          }}
+        >
           <TouchableOpacity>
             <Text style={{ fontSize: 10.5, fontWeight: "500", color: "white" }}>
               로그인
@@ -192,7 +193,8 @@ export default function Login() {
                 fontWeight: "500",
                 color: "white",
                 marginHorizontal: 36,
-              }}>
+              }}
+            >
               비밀번호 찾기
             </Text>
           </TouchableOpacity>
@@ -209,7 +211,8 @@ export default function Login() {
             flexDirection: "row",
             alignItems: "center",
             marginBottom: 36,
-          }}>
+          }}
+        >
           <View style={{ flex: 1, height: 0.5, backgroundColor: "white" }} />
           <Text style={{ marginHorizontal: 24, color: "white", fontSize: 12 }}>
             OR

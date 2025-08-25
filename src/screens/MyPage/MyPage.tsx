@@ -45,7 +45,7 @@ export default function MyPage() {
           return;
         }
         const res = await axios.get<MeResponse>(
-          "http://movingcash.sku-sku.com/sessions/getPointAndStep",
+          "https://movingcash.sku-sku.com/sessions/getPointAndStep",
           { headers: { Authorization: token } }
         );
         //name만 사용

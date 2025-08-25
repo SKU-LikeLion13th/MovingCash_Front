@@ -11,7 +11,8 @@ import Constants from "expo-constants";
 export default function PointMain() {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const [point, setPoint] = useState<number>(0);
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   const missions = [
     {
@@ -47,16 +48,13 @@ export default function PointMain() {
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/sessions/getPointAndStep`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/sessions/getPointAndStep`, {
+          method: "GET",
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           console.error(

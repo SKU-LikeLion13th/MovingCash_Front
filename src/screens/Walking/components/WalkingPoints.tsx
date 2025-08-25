@@ -19,7 +19,8 @@ export default function WalkingPoints() {
   const [point, setPoint] = useState(0);
   const { points } = useWalking();
   const navigation = useNavigation<NavigationProp<RootNavigationParamList>>();
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -32,16 +33,13 @@ export default function WalkingPoints() {
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/sessions/getPointAndStep`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/sessions/getPointAndStep`, {
+          method: "GET",
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           if (response.status === 401) {

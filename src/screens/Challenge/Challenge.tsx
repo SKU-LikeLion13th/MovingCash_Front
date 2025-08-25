@@ -52,7 +52,8 @@ const GAP = 15;
 const CARD_WIDTH = (SCREEN_WIDTH - H_PADDING * 2 - GAP) / 2;
 const CARD_HEIGHT = 260;
 const BG_COLORS = ["#B8DDFF", "#F9E482", "#FFBF92", "#E7F982"];
-const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+const API_URL =
+  Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
 const IMAGE_BY_ACTIVITY: Record<ActivityCode, ActivityImage> = {
   RUNNING: {
@@ -177,15 +178,12 @@ export default function Challenge() {
         return;
       }
       const date = todayStr();
-      const res = await axios.get(
-        `${API_URL}/challenge/all/${date}`,
-        {
-          headers: {
-            Authorization: `${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.get(`${API_URL}/challenge/all/${date}`, {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       const list = Array.isArray(res.data)
         ? res.data
         : Array.isArray(res.data?.data)

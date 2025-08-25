@@ -35,7 +35,8 @@ export default function MovingSpot() {
   const webRef = useRef<WebView>(null);
   const watcherRef = useRef<Location.LocationSubscription | null>(null);
   const googleHtml = useMemo(() => makeGoogleHtml(BROWSER_KEY), [BROWSER_KEY]);
-  const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+  const API_URL =
+    Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
   const [curPos, setCurPos] = useState<LatLng | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
@@ -182,17 +183,13 @@ export default function MovingSpot() {
         return;
       }
 
-      const res = await axios.post(
-        `${API_URL}/movingspot/places`,
-        payload,
-        {
-          headers: {
-            Authorization: `${token}`,
-            "Content-Type": "application/json",
-          },
-          validateStatus: (s) => s === 200,
-        }
-      );
+      const res = await axios.post(`${API_URL}/movingspot/places`, payload, {
+        headers: {
+          Authorization: `${token}`,
+          "Content-Type": "application/json",
+        },
+        validateStatus: (s) => s === 200,
+      });
 
       if (!Array.isArray(res.data)) {
         console.warn("DATA SHAPE ERROR");
@@ -240,7 +237,7 @@ export default function MovingSpot() {
         return;
       }
       await axios.post(
-        "http://movingcash.sku-sku.com/movingspot/refresh",
+        "https://movingcash.sku-sku.com/movingspot/refresh",
         {},
         {
           headers: {

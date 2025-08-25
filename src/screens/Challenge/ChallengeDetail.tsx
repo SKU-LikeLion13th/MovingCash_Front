@@ -18,7 +18,8 @@ const walkingImg = require("../../../assets/images/Challenge/walking.png");
 const RUNNING_STYLE: ImageStyle = { width: "30%" };
 const WALKING_STYLE: ImageStyle = { width: "40%", marginRight: 30 };
 
-const API_URL = Constants?.expoConfig?.extra?.apiUrl ?? "http://movingcash.sku-sku.com";
+const API_URL =
+  Constants?.expoConfig?.extra?.apiUrl ?? "https://movingcash.sku-sku.com";
 
 const todayStr = () => {
   const d = new Date();
@@ -105,7 +106,7 @@ export default function ChallengeDetail() {
               };
 
         const res = await axios.post(
-          "http://movingcash.sku-sku.com/mainPage",
+          "https://movingcash.sku-sku.com/mainPage",
           body,
           {
             headers: {
