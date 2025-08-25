@@ -23,7 +23,7 @@ const navigation = useNavigation<NavigationProp<MainStackParamList>>();
       route: "Challenge",
     },
     {
-      src: require("../../../assets/images/MovingSpot.png"),
+      src: require("../../../assets/images/MovingSpot/Spot.png"),
       label: "Moving spot",
       route: "MovingSpot",
     },

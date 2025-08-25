@@ -138,17 +138,17 @@ export default function ChallengeDetail() {
   return (
     <View className="flex-1 bg-[#101010]">
       <Header title="Challenge" />
-      <View className="mt-3 flex-1 bg-white rounded-t-3xl">
-        <View className="w-full items-center">
+      <View className="flex-1 mt-2 bg-white rounded-t-3xl">
+        <View className="items-center w-full mt-12">
           <Image source={src} style={imgStyle} resizeMode="contain" />
-          <View className="w-[80%] items-start">
+          <View className="w-[80%] mt-3 items-start">
             <Text className="text-xl font-bold">{title} 챌린지</Text>
 
             {/*진행도*/}
-            <View className="mt-5 w-full flex-row justify-between items-end mb-2">
+            <View className="flex-row items-end justify-between w-full mt-5 mb-2">
               <Text className="text-[16px] font-semibold">
                 <Text className="text-[#E9690D]">{formatVal(current)}</Text>
-                <Text className="text-gray-200 text-xs font-medium">
+                <Text className="text-xs font-medium text-gray-200">
                   {" "}
                   {unit}
                 </Text>
@@ -158,7 +158,7 @@ export default function ChallengeDetail() {
                 <Text className="text-[#E9690D]">
                   {activity === "WALKING" ? formatVal(goal) : formatVal(goal)}
                 </Text>
-                <Text className="text-gray-200 text-xs font-medium">
+                <Text className="text-xs font-medium text-gray-200">
                   {" "}
                   {unit}
                 </Text>
@@ -175,7 +175,7 @@ export default function ChallengeDetail() {
             </View>
 
             {/*걸으러가기?*/}
-            <View className="h-[30%]"></View>
+            <View className="h-[15%]"></View>
 
             {/*리워드*/}
             <Text className="text-xl font-bold">포인트 획득</Text>
@@ -183,7 +183,7 @@ export default function ChallengeDetail() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginTop: 15,
+                // marginTop: 15,
               }}
             >
               <Text
@@ -201,12 +201,12 @@ export default function ChallengeDetail() {
             <Pressable
               onPress={handleComplete}
               disabled={!isComplete}
-              className={`mt-7 w-full h-12 rounded-xl items-center justify-center ${
+              className={`mt-16 w-full h-12 rounded-xl items-center justify-center ${
                 isComplete ? "bg-[#E9690D]" : "bg-gray-300"
               }`}
               style={!isComplete ? { opacity: 0.7 } : undefined}
             >
-              <Text className="text-white font-semibold">
+              <Text className="font-semibold text-white">
                 {isComplete ? "챌린지 완료" : "목표 달성 후 완료"}
               </Text>
             </Pressable>

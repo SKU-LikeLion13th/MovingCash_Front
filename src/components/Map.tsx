@@ -14,9 +14,6 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 
-//구글 키 관련
-import Constants from "expo-constants";
-
 const GOOGLE_JS_KEY = (Constants.expoConfig?.extra as any)
   ?.googleMapsKey as string;
 
