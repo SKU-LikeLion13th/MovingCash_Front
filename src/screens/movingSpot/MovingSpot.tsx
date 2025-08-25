@@ -40,7 +40,7 @@ export default function MovingSpot() {
 
   const [curPos, setCurPos] = useState<LatLng | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["10%", "20%", "42%"], []);
+  const snapPoints = useMemo(() => ["10%", "20%", "40%"], []);
 
   const post = (msg: any) => webRef.current?.postMessage(JSON.stringify(msg));
 
@@ -271,6 +271,7 @@ export default function MovingSpot() {
           originWhitelist={["*"]}
           javaScriptEnabled
           domStorageEnabled
+          pointerEvents="box-none" // <--- 여기
         />
 
         {(loading || searchLoading) && (
@@ -322,7 +323,7 @@ export default function MovingSpot() {
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 15 }}
             showsVerticalScrollIndicator={false}
           >
-            <View className="w-full flex-row justify-center">
+            <View className="flex-row justify-center w-full">
               {cats.map((c) => (
                 <Pressable
                   key={c.key}
@@ -358,10 +359,11 @@ export default function MovingSpot() {
                 sheetRef.current?.snapToIndex?.(0);
                 navigation.navigate("Onboarding");
               }}
+              style={{ zIndex: 10, alignItems: "center", marginTop: 10 }}
             >
               <Image
                 source={require("../../../assets/images/MovingSpot/MovingBtn.png")}
-                className="w-[100%] h-[100%] mt-1"
+                style={{ width: 500, height: 75, marginTop: 8 }} // <- 픽셀 단위로 고정
                 resizeMode="contain"
               />
             </Pressable>
