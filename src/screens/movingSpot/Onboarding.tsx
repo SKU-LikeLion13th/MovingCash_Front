@@ -102,31 +102,38 @@ export default function Onboarding() {
     return true;
   }, [step, form]);
 
-  const pickWithEmoji = (labels: Set<string>, options: {label:string; emoji?:string}[]) =>
-  options.filter(o => labels.has(o.label)); 
+  const STEP_LABEL = useMemo(
+    () => (step === 1 ? "산책 테마" : step === 2 ? "난이도" : "편의기능"),
+    [step]
+  );
+
+  const pickWithEmoji = (
+    labels: Set<string>,
+    options: { label: string; emoji?: string }[]
+  ) => options.filter((o) => labels.has(o.label));
 
   // 제출
   const handleSubmit = async () => {
-  const payloadForApi = {
-    themes: Array.from(form.themes),
-    difficulty: Array.from(form.difficulty),
-    prefs: Array.from(form.prefs),
+    const payloadForApi = {
+      themes: Array.from(form.themes),
+      difficulty: Array.from(form.difficulty),
+      prefs: Array.from(form.prefs),
+    };
+    // TODO: API 호출 시엔 payloadForApi 쓰면 됨
+    const params = {
+      themes: pickWithEmoji(form.themes, STEP1_OPTIONS),
+      difficulty: pickWithEmoji(form.difficulty, STEP2_OPTIONS),
+      prefs: pickWithEmoji(form.prefs, STEP3_OPTIONS),
+    };
+    navigation.navigate("MovingSpotResult", params);
   };
-  // TODO: API 호출 시엔 payloadForApi 쓰면 됨
-  const params = {
-    themes: pickWithEmoji(form.themes, STEP1_OPTIONS),
-    difficulty: pickWithEmoji(form.difficulty, STEP2_OPTIONS),
-    prefs: pickWithEmoji(form.prefs, STEP3_OPTIONS),
-  };
-  navigation.navigate("MovingSpotResult", params);
-};
 
   return (
     <View className="flex-1 bg-[#101010] w-full">
       <Header title="무빙과 함께 걷는 ai 추천 산책 코스" />
 
       {/* 진행 바 */}
-      <View className="w-full px-5 mt-3">
+      <View className="w-full px-7 mt-3">
         <View className="w-full h-[6px] rounded-full bg-[#5B5B5B]" />
         <View
           className="h-[6px] rounded-full bg-[#FFFFFF] -mt-[6px]"
@@ -174,7 +181,7 @@ export default function Onboarding() {
               </Text>
               <View className="flex-row flex-wrap">
                 {STEP2_OPTIONS.map((o) => {
-                  const selected = form.difficulty.has(o.label); 
+                  const selected = form.difficulty.has(o.label);
                   return (
                     <Chip
                       key={o.label}
@@ -182,7 +189,7 @@ export default function Onboarding() {
                       label={o.label}
                       selected={selected}
                       onPress={() => {
-                        const next = new Set(form.difficulty); 
+                        const next = new Set(form.difficulty);
                         selected ? next.delete(o.label) : next.add(o.label);
                         setForm((f) => ({ ...f, difficulty: next }));
                       }}
@@ -224,7 +231,7 @@ export default function Onboarding() {
       {/* 하단 버튼 */}
       <View className="px-5 pb-6 w-full items-center">
         <Text className="text-[#939393] mb-4 text-xs">
-          모든 선택은 나중에 다시 수정할 수 있어요!
+          {STEP_LABEL}는 나중에 다시 수정할 수 있어요!
         </Text>
         <View className="flex-row justify-evenly w-full">
           <Pressable
